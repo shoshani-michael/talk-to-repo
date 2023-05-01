@@ -17,7 +17,7 @@ const InputBar = ({ input, setInput, handleKeyDown, handleSubmit }) => {
           <textarea
             ref={inputRef}
             rows="1"
-            placeholder="Do likes impact the ranking of my tweets?"
+            placeholder="I would like this feature: ..."
             className="flex-1 p-2 border rounded-lg focus:outline-none focus:ring focus:border-blue-300 resize-none overflow-hidden bg-gray-600 text-gray-100"
             value={input}
             onChange={(e) => setInput(e.target.value)}
@@ -32,7 +32,7 @@ const InputBar = ({ input, setInput, handleKeyDown, handleSubmit }) => {
         </div>
       </form>
       <div className="pb-2 text-center text-xs text-gray-400 md:pb-4">
-        This is still a WIP, and answers may not be correct. Algorithm code last updated 2023-04-14.
+        For a new topic please refresh the screen and ask the first question, which will load relevant context from the repo.
       </div>
     </div>
   )

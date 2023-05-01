@@ -19,26 +19,25 @@ function GitHubInput() {
   };
 
   return (
-    <div>
-      <label>
-        GitHub Username:
-        <input
-          type="text"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-        />
-      </label>
+    <div className="panel-container"> {/* Add a CSS class or style here for the panel */}
+      <input
+        type="text"
+        value={username}
+        placeholder="GitHub Username"
+        className="flex-1 p-2 border rounded-lg focus:outline-none focus:ring focus:border-blue-300 resize-none overflow-hidden bg-gray-600 text-gray-100"        
+        onChange={(e) => setUsername(e.target.value)}
+      />
       <br />
-      <label>
-        Repo:
-        <input
-          type="text"
-          value={repo}
+      <input
+        type="text"
+        value={repo}
+        placeholder="Repository Name"
+        className="flex-1 p-2 border rounded-lg focus:outline-none focus:ring focus:border-blue-300 resize-none overflow-hidden bg-gray-600 text-gray-100"        
           onChange={(e) => setRepo(e.target.value)}
-        />
-      </label>
+      />
       <br />
-      <button onClick={handleClick}>
+      <button onClick={handleClick} 
+        className="ml-2 px-2 py-1 rounded-lg bg-blue-500 text-white focus:outline-none hover:bg-blue-600 md:ml-4 md:px-4 md:py-2">
         Load Repo
       </button>
     </div>
