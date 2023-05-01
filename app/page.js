@@ -19,7 +19,7 @@ export default function Home() {
     }
 
     const getSystemMessage = async (userInputMessage) => {
-        const response = await fetch('https://chat-twitter-backend.fly.dev/system_message', {
+        const response = await fetch('http://localhost:8000/system_message', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -59,7 +59,7 @@ export default function Home() {
 
     const handleChat = async (updatedMessages) => {
         let accumulatedText = "";
-        fetch('https://chat-twitter-backend.fly.dev/chat_stream', {
+        fetch('http://localhost:8000/chat_stream', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
