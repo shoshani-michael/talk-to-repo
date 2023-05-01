@@ -102,14 +102,14 @@ def embedding_search(query, k):
         openai_api_key=os.environ['OPENAI_API_KEY'],
         openai_organization=os.environ['OPENAI_ORG_ID'],
     )
-    db = Pinecone(
-        index=os.environ['PINECONE_INDEX'],
-        embedding_function=embeddings.embed_query,
+    docsearch = Pinecone.from_existing_index(
+        os.environ['PINECONE_INDEX'], 
+        embeddings,
         text_key='text',
         namespace=os.environ['NAMESPACE']
     )
 
-    return db.similarity_search(query, k=k)
+    return docsearch.similarity_search(query, k=k)
 
 @app.get("/health")
 def health():
