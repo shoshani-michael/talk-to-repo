@@ -117,7 +117,8 @@ def health():
 
 @app.post("/system_message", response_model=ContextSystemMessage)
 def system_message(query: Message):
-    docs = embedding_search(query.text, k=10)
+    numdocs = int(os.environ['CONTEXT_NUM'])
+    docs = embedding_search(query.text, k=numdocs)
     context = format_context(docs)
 
     prompt = """Given the following context and code, answer the following question. Do not use outside context, and do not assume the user can see the provided context. Try to be as detailed as possible and reference the components that you are looking at. Keep in mind that these are only code snippets, and more snippets may be added during the conversation.
@@ -185,7 +186,7 @@ async def chat_stream(chat: List[Message]):
             messages = [latest_query]
 
             # for all the rest of the messages, iterate over them in reverse and fit as many in as possible
-            token_limit = 4000
+            token_limit = int(os.environ['TOKEN_LIMIT'])
             num_tokens = len(encoding.encode(chat[0].text)) + len(encoding.encode(formatted_query))
             for message in reversed(chat[1:-1]):
                 # count the number of new tokens
