@@ -1,6 +1,7 @@
 import os
 import threading
 import queue
+import subprocess
 
 from typing import List, Optional, Dict
 from fastapi import FastAPI, HTTPException
@@ -51,6 +52,10 @@ pinecone.init(
     api_key=os.environ['PINECONE_API_KEY'],
     environment=os.environ['ENVIRONMENT']
 )
+
+class RepoInfo(BaseModel):
+    username: str
+    repo: str
 
 class Message(BaseModel):
     text: str
@@ -215,3 +220,12 @@ async def chat_stream(chat: List[Message]):
         return g
 
     return StreamingResponse(chat_fn(chat), media_type='text/event-stream')
+
+@app.post("/load_repo")
+async def load_repo(repo_info: RepoInfo):
+    os.environ['ZIP_URL'] = f"https://github.com/{repo_info.username}/{repo_info.repo}/archive/refs/heads/main.zip"
+    
+    # call the create_vector_db.py script here, reload the vector database with new data from the repo
+    subprocess.run(["python", "create_vector_db.py"])
+    
+    return {"status": "success", "message": "Repo loaded successfully"}

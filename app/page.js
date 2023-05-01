@@ -6,6 +6,7 @@ import Head from 'next/head'
 import Header from '../components/Header'
 import ChatMessages from '../components/ChatMessages'
 import InputBar from '../components/InputBar'
+import GitHubInput from "../components/GitHubInput";
 
 export default function Home() {
     const [messages, setMessages] = useState([])
@@ -117,6 +118,7 @@ return (
   
         <div className="h-screen flex flex-col bg-gray-800 text-gray-100 font-sans font-roboto">
             <Header />
+            <GitHubInput />
             <div className="flex-1 overflow-auto p-4 flex justify-center">
                 <ChatMessages messages={messages} />
             </div>
