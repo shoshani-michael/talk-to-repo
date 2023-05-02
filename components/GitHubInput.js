@@ -3,6 +3,7 @@ import React, { useState } from "react";
 function GitHubInput() {
   const [username, setUsername] = useState("");
   const [repo, setRepo] = useState("");
+  const [token, setToken] = useState("");
 
   const handleClick = async () => {
     try {
@@ -37,6 +38,14 @@ function GitHubInput() {
         placeholder="Repository Name"
         className="flex-1 p-2 border rounded-lg focus:outline-none focus:ring focus:border-blue-300 resize-none overflow-hidden bg-gray-600 text-gray-100"        
           onChange={(e) => setRepo(e.target.value)}
+      />
+      <br />
+      <input
+        type="text"
+        value={token}
+        placeholder="GitHub API Token"
+        className="flex-1 p-2 border rounded-lg focus:outline-none focus:ring focus:border-blue-300 resize-none overflow-hidden bg-gray-600 text-gray-100"
+        onChange={(e) => setToken(e.target.value)}
       />
       <br />
       <button onClick={handleClick} 
