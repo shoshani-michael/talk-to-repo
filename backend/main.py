@@ -222,10 +222,15 @@ async def chat_stream(chat: List[Message]):
     return StreamingResponse(chat_fn(chat), media_type='text/event-stream')
 
 @app.post("/load_repo")
-async def load_repo(repo_info: RepoInfo):
+def load_repo(repo_info: RepoInfo):
     os.environ['ZIP_URL'] = f"https://github.com/{repo_info.username}/{repo_info.repo}/archive/refs/heads/main.zip"
     
-    # call the create_vector_db.py script here, reload the vector database with new data from the repo
+    pinecone_index = os.environ['PINECONE_INDEX']
+    namespace = os.environ['NAMESPACE']
+
+    index = pinecone.Index(pinecone_index)
+    delete_response = index.delete(delete_all=True, namespace=namespace)
+    
     subprocess.run(["python", "create_vector_db.py"])
     
     return {"status": "success", "message": "Repo loaded successfully"}
