@@ -6,11 +6,11 @@ function GitHubInput() {
 
   const handleClick = async () => {
     try {
-      const response = await fetch("http://localhost:8000/load_repo", {
+      const response = await fetch(process.env.NEXT_PUBLIC_BACKEND_URL + "/load_repo", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, repo }),
-      });
+    });
       const data = await response.json();
       console.log(data);
     } catch (error) {
@@ -19,7 +19,10 @@ function GitHubInput() {
   };
 
   return (
-    <div className="panel-container"> {/* Add a CSS class or style here for the panel */}
+
+    <div className="panel-container "
+    style={{position: 'fixed', left: 0, top: 'calc(50% - 50px)'}}
+    > {}
       <input
         type="text"
         value={username}
