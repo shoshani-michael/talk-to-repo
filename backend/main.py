@@ -56,6 +56,7 @@ pinecone.init(
 class RepoInfo(BaseModel):
     username: str
     repo: str
+    token: Optional[str] = None
 
 class Message(BaseModel):
     text: str

@@ -15,7 +15,7 @@ function GitHubInput() {
       const response = await fetch(process.env.NEXT_PUBLIC_BACKEND_URL + "/load_repo", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, repo }),
+        body: JSON.stringify({ username, repo, token }), 
       });
 
       const data = await response.json();
