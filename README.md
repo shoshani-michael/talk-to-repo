@@ -17,6 +17,8 @@ Right now, I'm footing the OpenAI bill on the public instance. But I may require
 Copy the .env.template file to create a .env file using the following command:
 ```bash
 cp .env.template .env
+cd backend
+cp .env.template .env
 ```
 
 Update the .env file with your values:
