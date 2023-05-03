@@ -70,9 +70,12 @@ def process_file_list(temp_dir):
 
     for root, _, files in os.walk(temp_dir):
         for filename in files:
-            if not is_unwanted_file(filename) and not '.git/' in root:
+            if not is_unwanted_file(filename):
                 file_path = os.path.join(root, filename)
+                if '.git' in file_path:
+                    continue
                 with open(file_path, 'rb') as file:
+                    print(f'Processing {file_path}')
                     file_contents, n_tokens = process_file(file)
                     file_name_trunc = re.sub(r'^[^/]+/', '', str(filename))
                     corpus_summary.append({'file_name': file_name_trunc, 'n_tokens': n_tokens})
