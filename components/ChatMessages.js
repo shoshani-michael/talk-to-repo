@@ -10,6 +10,18 @@ const ChatMessages = ({ messages }) => {
       !(message.sender === 'systemMessage' | (message.sender !== 'user' && message.text.length === 0)),
   );
 
+  const copyCodeToClipboard = (code) => {
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(code).then(() => {
+        console.log("Code copied to clipboard.");
+      }).catch(err => {
+        console.error("Error copying code to clipboard: ", err);
+      });
+    } else {
+      console.error("Clipboard API not supported.");
+    }
+  };
+
   const formatMessage = (text) => {
     const codeBlockRegex = /(```[\w]*[\s\S]+?```)/g;
     const parts = text.split(codeBlockRegex);
@@ -34,7 +46,7 @@ const ChatMessages = ({ messages }) => {
                     cursor: 'pointer'
                 }}
                 onClick={() => {
-                /* handle the click event to collect code */
+                  copyCodeToClipboard(part.replace(languageRegex, "").replace(/```$/, ""));
                 }}
             >
                 collect
