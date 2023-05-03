@@ -19,16 +19,38 @@ const ChatMessages = ({ messages }) => {
         const languageRegex = /```(\w*)\n/;
         const languageMatch = part.match(languageRegex);
         const language = languageMatch && languageMatch[1] ? languageMatch[1] : '';
-  
+        const collectButton = (
+            <button
+                style={{
+                    position: 'absolute',
+                    top: 0,
+                    right: 0,
+                    padding: '2px',
+                    borderRadius: '2px',
+                    borderBottomLeftRadius: '5px',
+                    fontSize: '14px',
+                    background: 'rgba(255, 255, 255, 0.1)',
+                    color: 'white',
+                    cursor: 'pointer'
+                }}
+                onClick={() => {
+                /* handle the click event to collect code */
+                }}
+            >
+                collect
+            </button>
+        );
         return (
+          <div key={index} style={{ position: 'relative' }}>
+          {collectButton}
           <SyntaxHighlighter
-            key={index}
             language={language}
             style={oneDark}
             customStyle={{ backgroundColor: '#2d2d2d', borderRadius: '0.375rem', padding: '1rem' }}
           >
             {part.replace(languageRegex, '').replace(/```$/, '')}
           </SyntaxHighlighter>
+          </div>
         );
       } else {
         return (
