@@ -39,21 +39,22 @@ splitter = RecursiveCharacterTextSplitter(
     chunk_overlap=int(os.environ['CHUNK_OVERLAP'])
     )
 
-def clone_from_github():
+def clone_from_github(REPO_URL):
     temp_dir = tempfile.mkdtemp()
-    repo_url = os.environ["REPO_URL"]
+    repo_url = REPO_URL
     token = os.environ["GITHUB_TOKEN"] if "GITHUB_TOKEN" in os.environ else None
 
     if token:
         repo_url = repo_url.replace("https://", f"https://x-access-token:{token}@")
 
+    print(f"Cloning {repo_url} into {temp_dir}")
     subprocess.run(["git", "clone", repo_url, temp_dir], check=True)
     return temp_dir
 
 def is_unwanted_file(file_name):
     if (file_name.endswith('/') or 
         any(f in file_name for f in ['.DS_Store', '.gitignore']) or 
-        any(file_name.endswith(ext) for ext in ['.png', '.jpg', '.jpeg', '.mp3'])
+        any(file_name.endswith(ext) for ext in ['.png', '.jpg', '.jpeg', '.mp3', '.ico'])
     ):
         return True
     return False
@@ -69,13 +70,14 @@ def process_file_list(temp_dir):
 
     for root, _, files in os.walk(temp_dir):
         for filename in files:
-            if not is_unwanted_file(filename):
+            if not is_unwanted_file(filename) and not '.git/' in root:
                 file_path = os.path.join(root, filename)
-                file_contents, n_tokens = process_file(file_path)
-                file_name_trunc = re.sub(r'^[^/]+/', '', str(filename))
-                corpus_summary.append({'file_name': file_name_trunc, 'n_tokens': n_tokens})
-                file_texts.append(file_contents)
-                metadatas.append({'document_id': file_name_trunc})
+                with open(file_path, 'rb') as file:
+                    file_contents, n_tokens = process_file(file)
+                    file_name_trunc = re.sub(r'^[^/]+/', '', str(filename))
+                    corpus_summary.append({'file_name': file_name_trunc, 'n_tokens': n_tokens})
+                    file_texts.append(file_contents)
+                    metadatas.append({'document_id': file_name_trunc})
 
     split_documents = splitter.create_documents(file_texts, metadatas=metadatas)
     vector_store.from_documents(
@@ -89,5 +91,9 @@ def process_file_list(temp_dir):
 
     return 
 
-temp_dir = clone_from_github()
-process_file_list(temp_dir)
+def create_vector_db(REPO_URL):
+    temp_dir = clone_from_github(REPO_URL)
+    process_file_list(temp_dir)
+
+if __name__ == '__main__':
+    create_vector_db( os.environ["REPO_URL"] )

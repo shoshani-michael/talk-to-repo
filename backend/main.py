@@ -1,7 +1,8 @@
 import os
 import threading
 import queue
-import subprocess
+
+from create_vector_db import create_vector_db
 
 from typing import List, Optional, Dict
 from fastapi import FastAPI, HTTPException
@@ -225,10 +226,10 @@ async def chat_stream(chat: List[Message]):
 @app.post("/load_repo")
 def load_repo(repo_info: RepoInfo):
     if repo_info.token:
-        os.environ['ZIP_URL'] = f"https://api.github.com/repos/{repo_info.username}/{repo_info.repo}/zipball/main"
+        REPO_URL = f"https://x-access-token:{repo_info.token}@github.com/{repo_info.username}/{repo_info.repo}.git"
         os.environ['GITHUB_TOKEN'] = repo_info.token
     else:
-        os.environ['ZIP_URL'] = f"https://github.com/{repo_info.username}/{repo_info.repo}/archive/refs/heads/main.zip"
+        REPO_URL = f"https://github.com/{repo_info.username}/{repo_info.repo}.git"
 
     pinecone_index = os.environ['PINECONE_INDEX']
     namespace = os.environ['NAMESPACE']
@@ -236,6 +237,6 @@ def load_repo(repo_info: RepoInfo):
     index = pinecone.Index(pinecone_index)
     delete_response = index.delete(delete_all=True, namespace=namespace)
     
-    subprocess.run(["python", "create_vector_db.py"])
+    create_vector_db(REPO_URL)
     
     return {"status": "success", "message": "Repo loaded successfully"}
