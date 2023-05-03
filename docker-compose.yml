@@ -5,6 +5,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    image: arjeo/talk-to-repo-frontend
     ports:
       - '3000:3000'
     environment:
@@ -14,6 +15,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
+    image: arjeo/talk-to-repo-backend
     ports:
       - '8000:8000'
     environment:
