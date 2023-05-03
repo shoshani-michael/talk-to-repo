@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 
-function GitHubInput() {
+function GitHubInput(props) {
   const [username, setUsername] = useState("");
   const [repo, setRepo] = useState("");
   const [token, setToken] = useState("");
@@ -37,6 +37,7 @@ function GitHubInput() {
         localStorage.setItem("username", username);
         localStorage.setItem("repo", repo);
         localStorage.setItem("token", token);
+        props.clearMessages(); 
       }
     } catch (error) {
       console.error(error);

@@ -19,6 +19,10 @@ export default function Home() {
         }
     }
 
+    const clearMessages = () => {
+        setMessages([]);
+    }
+
     const getSystemMessage = async (userInputMessage) => {
         const response = await fetch('http://localhost:8000/system_message', {
             method: 'POST',
@@ -118,7 +122,7 @@ return (
   
         <div className="h-screen flex flex-col bg-gray-800 text-gray-100 font-sans font-roboto">
             <Header />
-            <GitHubInput />
+            <GitHubInput clearMessages={clearMessages} />
             <div className="flex-1 overflow-auto p-4 flex justify-center">
                 <ChatMessages messages={messages} />
             </div>
