@@ -27,8 +27,13 @@ def zipfile_from_github():
         req.add_header("Authorization", f"Bearer {token}")
 
     http_response = urlopen(req)
-    zf = BytesIO(http_response.read())
-    return zipfile.ZipFile(zf, 'r')
+
+    # Save the zip file to filesystem
+    with open('data/downloaded_zip.zip', 'wb') as f:
+        f.write(http_response.read())
+    
+    # Return the zipfile object using the file saved on the filesystem
+    return zipfile.ZipFile('data/downloaded_zip.zip', 'r')
 
 embeddings = OpenAIEmbeddings(
     openai_api_key=os.environ['OPENAI_API_KEY'],

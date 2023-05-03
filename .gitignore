@@ -41,3 +41,4 @@ embeddings_exploration.ipynb
 fly.toml
 
 .venv
+backend/data
