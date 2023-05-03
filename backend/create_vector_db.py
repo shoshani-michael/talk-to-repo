@@ -19,15 +19,6 @@ from io import BytesIO
 from dotenv import load_dotenv
 load_dotenv()
 
-def embed_document(vector_db, splitter, document_id, document):
-    metadata = [{'document_id': document_id}]
-    split_documents = splitter.create_documents([str(document)], metadatas=metadata)
-
-    texts = [d.page_content for d in split_documents]
-    metadatas = [d.metadata for d in split_documents]
-
-    docsearch = vector_db.add_texts(texts, metadatas=metadatas)
-
 def zipfile_from_github():
     req = Request(os.environ['ZIP_URL'])
     token = os.environ['GITHUB_TOKEN'] if 'GITHUB_TOKEN' in os.environ else None
