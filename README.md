@@ -44,6 +44,35 @@ The frontend communicates with the backend via RESTful APIs. User input and repo
 
 The frontend is hosted on Vercel, and the backend is hosted on a small node on [fly.io](https://fly.io/). Instructions for deploying the app locally, as well as launching it with Docker, are provided in the README file.
 
+## Running with Docker Compose
+
+The application now supports Docker Compose to simplify its deployment using both frontend and backend Docker containers. Before proceeding, ensure you have Docker and Docker Compose installed on your system.
+
+1. Set up environment variables:
+
+Copy the `.env.template` file to create a `.env` file for both the frontend and backend, if you haven't already:
+
+```bash
+    cp .env.template .env
+    cd backend
+    cp .env.template .env
+    cd ..
+```
+
+Replace the placeholder values in both `.env` files with your actual API keys, organization ID, and other configuration values as needed. Save the files when you're done.
+
+2. Build and run the Docker Compose:
+
+To build and run the Talk to Repo app using Docker Compose, run the following command:
+    
+```bash
+    docker-compose up --build
+```
+
+
+Docker Compose will then build both the frontend and backend Docker images and start the associated containers. Once the containers are up and running, you can access the app at `http://localhost:3000`.
+
+To stop the Docker Compose, press `Ctrl+C` in the terminal, or run `docker-compose down` from another terminal.
 
 ## Running locally
 
@@ -91,10 +120,6 @@ uvicorn main:app --reload
 ```
 
 Now, you can access the app at `http://localhost:3000`.
-
-## Launching with Docker
-
-To run the Talk to Repo app using Docker, build the Docker image using the provided Dockerfile and then run a container with the built image. Make sure you have Docker installed on your system before proceeding.
 
 ## Potential improvements
 
