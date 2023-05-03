@@ -57,13 +57,13 @@ splitter = RecursiveCharacterTextSplitter(
     chunk_overlap=int(os.environ['CHUNK_OVERLAP'])
     )
 
-total_tokens, corpus_summary = 0, []
-file_texts, metadatas = [], []
-with zipfile_from_github() as zip_ref:
+def process_zip_files(zip_ref):
+    total_tokens, corpus_summary = 0, []
+    file_texts, metadatas = [], []
+
     zip_file_list = zip_ref.namelist()
-    
-    pbar = tqdm(zip_file_list, desc=f'Total tokens: 0')
-    for file_name in pbar:
+
+    for file_name in zip_file_list:
         if (file_name.endswith('/') or 
             any(f in file_name for f in ['.DS_Store', '.gitignore']) or 
             any(file_name.endswith(ext) for ext in ['.png', '.jpg', '.jpeg', '.mp3'])
@@ -73,21 +73,25 @@ with zipfile_from_github() as zip_ref:
             with zip_ref.open(file_name, 'r') as file:
                 file_contents = str(file.read())
                 file_name_trunc = re.sub(r'^[^/]+/', '', str(file_name))
-                
+
                 n_tokens = len(encoder.encode(file_contents))
                 total_tokens += n_tokens
                 corpus_summary.append({'file_name': file_name_trunc, 'n_tokens': n_tokens})
 
                 file_texts.append(file_contents)
                 metadatas.append({'document_id': file_name_trunc})
-                pbar.set_description(f'Total tokens: {total_tokens}')
 
-split_documents = splitter.create_documents(file_texts, metadatas=metadatas)
-vector_store.from_documents(
-    documents=split_documents, 
-    embedding=embeddings,
-    index_name=os.environ['PINECONE_INDEX'],
-    namespace=os.environ['NAMESPACE']
-)
+    split_documents = splitter.create_documents(file_texts, metadatas=metadatas)
+    vector_store.from_documents(
+        documents=split_documents,
+        embedding=embeddings,
+        index_name=os.environ['PINECONE_INDEX'],
+        namespace=os.environ['NAMESPACE']
+    )
 
-pd.DataFrame.from_records(corpus_summary).to_csv('data/corpus_summary.csv', index=False)
+    pd.DataFrame.from_records(corpus_summary).to_csv('data/corpus_summary.csv', index=False)
+
+    return total_tokens, corpus_summary
+
+with zipfile_from_github() as zip_ref:
+    process_zip_files(zip_ref)
