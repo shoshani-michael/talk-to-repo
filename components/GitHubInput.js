@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 function GitHubInput() {
   const [username, setUsername] = useState("");
@@ -6,6 +6,16 @@ function GitHubInput() {
   const [token, setToken] = useState("");
   const [loading, setLoading] = useState(false);
   const [loadingStatus, setLoadingStatus] = useState(null);
+  
+  useEffect(() => {
+    const storedUsername = localStorage.getItem("username");
+    const storedRepo = localStorage.getItem("repo");
+    const storedToken = localStorage.getItem("token");
+  
+    if (storedUsername) setUsername(storedUsername);
+    if (storedRepo) setRepo(storedRepo);
+    if (storedToken) setToken(storedToken);
+  }, []);
 
   const handleClick = async () => {
     setLoading(true); // Start loading
@@ -23,6 +33,11 @@ function GitHubInput() {
       
       setLoading(false); // Stop loading
       setLoadingStatus(response.ok ? 'success' : 'error');
+      if (response.ok) {
+        localStorage.setItem("username", username);
+        localStorage.setItem("repo", repo);
+        localStorage.setItem("token", token);
+      }
     } catch (error) {
       console.error(error);
       setLoading(false); // Stop loading
