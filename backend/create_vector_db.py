@@ -41,7 +41,7 @@ splitter = RecursiveCharacterTextSplitter(
     chunk_overlap=int(os.environ['CHUNK_OVERLAP'])
     )
 
-def zipfile_from_github():
+def download_from_github():
     req = Request(os.environ['ZIP_URL'])
     token = os.environ['GITHUB_TOKEN'] if 'GITHUB_TOKEN' in os.environ else None
     print(token, os.environ['ZIP_URL'])
@@ -55,7 +55,10 @@ def zipfile_from_github():
         f.write(http_response.read())
     
     # Return the zipfile object using the file saved on the filesystem
-    return zipfile.ZipFile('data/downloaded_zip.zip', 'r')
+    zip_ref = zipfile.ZipFile('data/downloaded_zip.zip', 'r')
+    file_list = zip_ref.namelist()
+    filtered_file_list = [file_name for file_name in file_list if not is_unwanted_file(file_name)]
+    return filtered_file_list, zip_ref
 
 def is_unwanted_file(file_name):
     if (file_name.endswith('/') or 
@@ -70,18 +73,17 @@ def process_file(file):
     n_tokens = len(encoder.encode(file_contents))
     return file_contents, n_tokens
 
-def process_file_list(file_list):
+def process_file_list(file_list, zip_ref):
     corpus_summary = []
     file_texts, metadatas = [], []
 
     for file_name in file_list:
-        if not is_unwanted_file(file_name):
-            with zip_ref.open(file_name, 'r') as file:
-                file_contents, n_tokens = process_file(file)
-                file_name_trunc = re.sub(r'^[^/]+/', '', str(file_name))
-                corpus_summary.append({'file_name': file_name_trunc, 'n_tokens': n_tokens})
-                file_texts.append(file_contents)
-                metadatas.append({'document_id': file_name_trunc})
+        with zip_ref.open(file_name, 'r') as file:
+            file_contents, n_tokens = process_file(file)
+            file_name_trunc = re.sub(r'^[^/]+/', '', str(file_name))
+            corpus_summary.append({'file_name': file_name_trunc, 'n_tokens': n_tokens})
+            file_texts.append(file_contents)
+            metadatas.append({'document_id': file_name_trunc})
 
     split_documents = splitter.create_documents(file_texts, metadatas=metadatas)
     vector_store.from_documents(
@@ -95,6 +97,5 @@ def process_file_list(file_list):
 
     return 
 
-with zipfile_from_github() as zip_ref:
-    zip_file_list = zip_ref.namelist()
-    process_file_list(zip_file_list)
+filtered_file_list, zip_ref = download_from_github()
+process_file_list(filtered_file_list, zip_ref)
