@@ -224,8 +224,12 @@ async def chat_stream(chat: List[Message]):
 
 @app.post("/load_repo")
 def load_repo(repo_info: RepoInfo):
-    os.environ['ZIP_URL'] = f"https://github.com/{repo_info.username}/{repo_info.repo}/archive/refs/heads/main.zip"
-    
+    if repo_info.token:
+        os.environ['ZIP_URL'] = f"https://api.github.com/repos/{repo_info.username}/{repo_info.repo}/zipball/main"
+        os.environ['GITHUB_TOKEN'] = repo_info.token
+    else:
+        os.environ['ZIP_URL'] = f"https://github.com/{repo_info.username}/{repo_info.repo}/archive/refs/heads/main.zip"
+
     pinecone_index = os.environ['PINECONE_INDEX']
     namespace = os.environ['NAMESPACE']
 

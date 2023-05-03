@@ -2,6 +2,7 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.vectorstores import Pinecone
 import pinecone
+from urllib.request import Request
 
 import pandas as pd
 import tiktoken
@@ -28,7 +29,13 @@ def embed_document(vector_db, splitter, document_id, document):
     docsearch = vector_db.add_texts(texts, metadatas=metadatas)
 
 def zipfile_from_github():
-    http_response = urlopen(os.environ['ZIP_URL'])
+    req = Request(os.environ['ZIP_URL'])
+    token = os.environ['GITHUB_TOKEN'] if 'GITHUB_TOKEN' in os.environ else None
+    print(token, os.environ['ZIP_URL'])
+    if token:
+        req.add_header("Authorization", f"Bearer {token}")
+
+    http_response = urlopen(req)
     zf = BytesIO(http_response.read())
     return zipfile.ZipFile(zf, 'r')
 
