@@ -22,9 +22,10 @@ from langchain.embeddings import OpenAIEmbeddings
 from langchain.vectorstores import Pinecone
 
 import pinecone
-import openai
 import tiktoken
 import os
+import pandas as pd
+
 
 # Import dotenv and load the variables from .env file
 from dotenv import load_dotenv
@@ -48,8 +49,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-LOCAL_REPO_PATH = ""
+import tempfile
 
 pinecone.init(
     api_key=os.environ['PINECONE_API_KEY'],
@@ -97,8 +97,42 @@ class ChainStreamHandler(StreamingStdOutCallbackHandler):
     def on_llm_new_token(self, token: str, **kwargs):
         self.gen.send(token)
 
-def format_context(docs):
-    context = '\n\n'.join([f'From file {d.metadata["document_id"]}:\n' + str(d.page_content) for d in docs])
+encoder = tiktoken.get_encoding('cl100k_base')
+
+def format_context(docs, LOCAL_REPO_PATH):
+    # Load corpus_summary.csv
+    corpus_summary = pd.read_csv("data/corpus_summary.csv")
+
+    aggregated_docs = {}
+
+    for d in docs:
+        document_id = d.metadata["document_id"]
+        if document_id in aggregated_docs:
+            aggregated_docs[document_id].append(d.page_content)
+        else:
+            aggregated_docs[document_id] = [d.page_content]
+
+    context_parts = []
+    for document_id, content_parts in aggregated_docs.items():
+        # Calculate the token count of the entire file
+        entire_file_token_count = corpus_summary.loc[corpus_summary["file_name"] == document_id]["n_tokens"].values[0]
+
+        # Calculate the token count of the content_parts
+        content_parts_token_count = sum([len(encoder.encode(cp)) for cp in content_parts])
+
+        if content_parts_token_count / entire_file_token_count > 0.5:
+            # Include the entire file contents instead
+            fname = os.path.join(LOCAL_REPO_PATH, document_id)
+            print(f"Reading file {fname}")
+            with open(fname, "r") as f:
+                file_contents = f.read()
+            context_parts.append(f'Full file {document_id}:\n' + file_contents)
+        else:
+            # Include only the content_parts
+            context_parts.append(f'Snippets from file {document_id}:\n' + "\n---\n".join(content_parts))
+
+    context = "\n\n".join(context_parts)
+
     return context
 
 def format_query(query, context):
@@ -142,9 +176,10 @@ def health():
 
 @app.post("/system_message", response_model=ContextSystemMessage)
 def system_message(query: Message):
+    LOCAL_REPO_PATH = os.environ['LOCAL_REPO_PATH']
     numdocs = int(os.environ['CONTEXT_NUM'])
     docs = embedding_search(query.text, k=numdocs)
-    context = format_context(docs)
+    context = format_context(docs, LOCAL_REPO_PATH)
     additional_context = get_last_commits_messages(LOCAL_REPO_PATH)
 
 
@@ -167,6 +202,7 @@ def system_message(query: Message):
 @app.post("/chat_stream")
 async def chat_stream(chat: List[Message]):
     model_name = os.environ['MODEL_NAME']
+    LOCAL_REPO_PATH = os.environ['LOCAL_REPO_PATH']
     encoding_name = 'cl100k_base'
 
     def llm_thread(g, prompt):
@@ -204,7 +240,7 @@ async def chat_stream(chat: List[Message]):
 
                 # add some more context
                 docs = embedding_search(query_text, k=2)
-                context = format_context(docs)
+                context = format_context(docs, LOCAL_REPO_PATH)
                 formatted_query = format_query(latest_query, context)
             else:
                 formatted_query = chat[-1].text
@@ -258,7 +294,9 @@ def load_repo(repo_info: RepoInfo):
 
     index = pinecone.Index(pinecone_index)
     delete_response = index.delete(delete_all=True, namespace=namespace)
-    
-    LOCAL_REPO_PATH = create_vector_db(REPO_URL)
+
+    LOCAL_REPO_PATH = tempfile.mkdtemp()
+    os.environ['LOCAL_REPO_PATH'] = LOCAL_REPO_PATH
+    create_vector_db(REPO_URL, LOCAL_REPO_PATH)
 
     return {"status": "success", "message": "Repo loaded successfully"}

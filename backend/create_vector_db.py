@@ -39,8 +39,8 @@ splitter = RecursiveCharacterTextSplitter(
     chunk_overlap=int(os.environ['CHUNK_OVERLAP'])
     )
 
-def clone_from_github(REPO_URL):
-    temp_dir = tempfile.mkdtemp()
+def clone_from_github(REPO_URL, LOCAL_REPO_PATH):
+    temp_dir = LOCAL_REPO_PATH 
     repo_url = REPO_URL
     token = os.environ["GITHUB_TOKEN"] if "GITHUB_TOKEN" in os.environ else None
 
@@ -49,7 +49,7 @@ def clone_from_github(REPO_URL):
 
     print(f"Cloning {repo_url} into {temp_dir}")
     subprocess.run(["git", "clone", repo_url, temp_dir], check=True)
-    return temp_dir
+    return
 
 def is_unwanted_file(file_name):
     if (file_name.endswith('/') or 
@@ -77,10 +77,9 @@ def process_file_list(temp_dir):
                 with open(file_path, 'rb') as file:
                     print(f'Processing {file_path}')
                     file_contents, n_tokens = process_file(file)
-                    file_name_trunc = re.sub(r'^[^/]+/', '', str(filename))
-                    corpus_summary.append({'file_name': file_name_trunc, 'n_tokens': n_tokens})
+                    corpus_summary.append({'file_name': file_path, 'n_tokens': n_tokens})
                     file_texts.append(file_contents)
-                    metadatas.append({'document_id': file_name_trunc})
+                    metadatas.append({'document_id': file_path})
 
     split_documents = splitter.create_documents(file_texts, metadatas=metadatas)
     vector_store.from_documents(
@@ -94,10 +93,10 @@ def process_file_list(temp_dir):
 
     return 
 
-def create_vector_db(REPO_URL):
-    temp_dir = clone_from_github(REPO_URL)
-    process_file_list(temp_dir)
-    return temp_dir
+def create_vector_db(REPO_URL, LOCAL_REPO_PATH):
+    clone_from_github(REPO_URL, LOCAL_REPO_PATH)
+    process_file_list(LOCAL_REPO_PATH)
+    return 
 
 if __name__ == '__main__':
-    create_vector_db( os.environ["REPO_URL"] )
+    create_vector_db( os.environ["REPO_URL"], os.environ["LOCAL_REPO_PATH"] )
