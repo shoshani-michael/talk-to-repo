@@ -1,0 +1,11 @@
+{
+    "name": "Talk-to-Repo",
+    "dockerComposeFile": "../docker-compose.yml",
+    "service": ["frontend", "backend"],
+    "workspaceFolder": ".",
+    "settings": {
+      "terminal.integrated.defaultProfile.linux": "bash"
+    },
+    "extensions": ["dbaeumer.vscode-eslint", "esbenp.prettier-vscode"]
+  }
+  
