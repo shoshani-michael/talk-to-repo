@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
-const ChatMessages = ({ messages }) => {
+const ChatMessages = ({ messages, onCollectCodeBlock }) => {
   const [fileData, setFileData] = useState([]);
 
   const filteredMessages = messages.filter(
@@ -23,6 +23,7 @@ const ChatMessages = ({ messages }) => {
     } else {
       console.error("Clipboard API not supported.");
     }
+    onCollectCodeBlock(code);
   };
 
   const toggleButton = (

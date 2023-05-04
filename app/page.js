@@ -10,6 +10,7 @@ import GitHubInput from "../components/GitHubInput";
 
 export default function Home() {
     const [messages, setMessages] = useState([])
+    const [collectedCodeBlocks, setCollectedCodeBlocks] = useState([]);
     const [input, setInput] = useState('')
     const inputRef = useRef(null)
 
@@ -19,6 +20,10 @@ export default function Home() {
         }
     }
 
+    const handleCollectCodeBlock = (code) => {
+        setCollectedCodeBlocks((prevBlocks) => [...prevBlocks, code]);
+    };
+      
     const clearMessages = () => {
         setMessages([]);
     }
@@ -123,9 +128,19 @@ return (
         <div className="h-screen flex flex-col bg-gray-800 text-gray-100 font-sans font-roboto">
             <Header />
             <GitHubInput clearMessages={clearMessages} />
-            <div className="flex-1 overflow-auto p-4 flex justify-center">
-                <ChatMessages messages={messages} />
+            <div className="flex-1 overflow-auto p-4">
+                <div className="flex justify-center space-x-4">
+                    <ChatMessages messages={messages} onCollectCodeBlock={handleCollectCodeBlock} />
+                    <div className="w-full md:w-1/2 md:max-w-xl">
+                        {collectedCodeBlocks.map((code, index) => (
+                            <div key={index} className="mb-4 p-3 rounded-lg shadow-md whitespace-pre-wrap bg-gray-100 text-gray-800">
+                                {code}
+                            </div>
+                        ))}
+                    </div>
+                </div>
             </div>
+
   
             <div className="border-t border-gray-700">
                 <InputBar
