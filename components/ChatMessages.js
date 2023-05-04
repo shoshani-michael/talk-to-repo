@@ -9,6 +9,8 @@ const ChatMessages = ({ messages }) => {
     (message) =>
       !(message.sender === 'systemMessage' | (message.sender !== 'user' && message.text.length === 0)),
   );
+  
+  const [showSystemMessages, setShowSystemMessages] = useState(false);
 
   const copyCodeToClipboard = (code) => {
     if (navigator.clipboard) {
@@ -22,6 +24,17 @@ const ChatMessages = ({ messages }) => {
     }
   };
 
+  const getDisplayMessages = () => {
+    if (showSystemMessages) {
+      return messages;
+    } else {
+      return messages.filter(
+        (message) =>
+          !(message.sender === 'systemMessage' || (message.sender !== 'user' && message.text.length === 0))
+      );
+    }
+  };
+  
   const formatMessage = (text) => {
     const codeBlockRegex = /(```[\w]*[\s\S]+?```)/g;
     const parts = text.split(codeBlockRegex);
@@ -123,12 +136,17 @@ const ChatMessages = ({ messages }) => {
 
   return (
     <div className="w-full md:w-1/2 md:max-w-xl">
-      {filteredMessages.map((message, index) => (
+      {getDisplayMessages().map((message, index) => (
         <div
           key={index}
           className={`mb-4 p-3 text-lg rounded-lg shadow-md whitespace-pre-wrap ${
             message.sender === 'user' ? 'bg-gray-100 text-gray-800' : 'bg-gray-600'
           }`}
+          onClick={() => {
+            if (message.sender === 'user') {
+              setShowSystemMessages(!showSystemMessages);
+            }
+          }}
         >
           {formatMessage(message.text)}
         </div>
