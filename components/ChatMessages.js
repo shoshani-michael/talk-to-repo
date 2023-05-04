@@ -12,6 +12,7 @@ const ChatMessages = ({ messages }) => {
   
   const [showSystemMessages, setShowSystemMessages] = useState(false);
 
+  const codeBlockRegex = /(```[\w]*[\s\S]+?```)/g;
   const copyCodeToClipboard = (code) => {
     if (navigator.clipboard) {
       navigator.clipboard.writeText(code).then(() => {
@@ -35,8 +36,33 @@ const ChatMessages = ({ messages }) => {
     }
   };
   
+  const escapeInnerBackticks = (str) => {
+    let nesting = 0;
+    let escaped = '';
+  
+    // Split and iterate over the parts based on code block regex
+    const parts = str.split(codeBlockRegex);
+    parts.forEach((part, index) => {
+      if (codeBlockRegex.test(part)) {
+        nesting += 1;
+  
+        // Escape the backticks only if the current nesting level is greater than 1
+        if (nesting > 1) {
+          escaped += part.replace(/```/g, '&#96;&#96;&#96;');
+        } else {
+          escaped += part;
+        }
+  
+        // Decrement nesting when closing backticks are encountered
+        if (nesting > 0) nesting -= 1;
+      } else {
+        escaped += part;
+      }
+    });
+
+    return escaped;
+  }
   const formatMessage = (text) => {
-    const codeBlockRegex = /(```[\w]*[\s\S]+?```)/g;
     const parts = text.split(codeBlockRegex);
   
     return parts.map((part, index) => {
@@ -73,7 +99,7 @@ const ChatMessages = ({ messages }) => {
             style={oneDark}
             customStyle={{ backgroundColor: '#2d2d2d', borderRadius: '0.375rem', padding: '1rem' }}
           >
-            {part.replace(languageRegex, '').replace(/```$/, '')}
+            {escapeInnerBackticks(part.replace(languageRegex, '').replace(/```$/, ''))}
           </SyntaxHighlighter>
           </div>
         );
