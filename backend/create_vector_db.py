@@ -50,7 +50,25 @@ def clone_from_github(REPO_URL, LOCAL_REPO_PATH):
 
 def is_unwanted_file(file_name):
     if (file_name.endswith('/') or 
-        any(f in file_name for f in ['.DS_Store', '.gitignore', 'package-lock.json']) or 
+        any(f in file_name for f in [
+            '.DS_Store', 
+            '.gitignore', 
+            'package-lock.json',
+            'yarn.lock',
+            'Podfile.lock',
+            'Cartfile.resolved',
+            'mix.lock',
+            'Pipfile.lock',
+            'go.sum',
+            'Cargo.lock',
+            'Gopkg.lock',
+            'Berksfile.lock',
+            'npm-shrinkwrap.json',
+            'rebar.lock',
+            'pubspec.lock',
+            'composer.lock',
+            'Gemfile.lock',
+            ]) or 
         any(file_name.endswith(ext) for ext in ['.png', '.jpg', '.jpeg', '.mp3', '.ico'])
     ):
         return True
