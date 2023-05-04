@@ -44,9 +44,6 @@ def clone_from_github(REPO_URL, LOCAL_REPO_PATH):
     repo_url = REPO_URL
     token = os.environ["GITHUB_TOKEN"] if "GITHUB_TOKEN" in os.environ else None
 
-    if token:
-        repo_url = repo_url.replace("https://", f"https://x-access-token:{token}@")
-
     print(f"Cloning {repo_url} into {temp_dir}")
     subprocess.run(["git", "clone", repo_url, temp_dir], check=True)
     return

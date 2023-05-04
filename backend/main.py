@@ -284,7 +284,7 @@ async def chat_stream(chat: List[Message]):
 @app.post("/load_repo")
 def load_repo(repo_info: RepoInfo):
     if repo_info.token:
-        REPO_URL = f"https://x-access-token:{repo_info.token}@github.com/{repo_info.username}/{repo_info.repo}.git"
+        REPO_URL = f"https://{repo_info.token}@github.com/{repo_info.username}/{repo_info.repo}.git"
         os.environ['GITHUB_TOKEN'] = repo_info.token
     else:
         REPO_URL = f"https://github.com/{repo_info.username}/{repo_info.repo}.git"
