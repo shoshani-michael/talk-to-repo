@@ -49,7 +49,7 @@ function GitHubInput(props) {
   return (
 
     <div className="panel-container "
-    style={{position: 'fixed', left: 0, top: 'calc(50% - 50px)'}}
+    style={{position: 'fixed', left: 0, top: 0}}
     > {}
       <input
         type="text"

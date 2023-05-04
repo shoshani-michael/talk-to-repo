@@ -6,7 +6,8 @@ import Head from 'next/head'
 import Header from '../components/Header'
 import ChatMessages from '../components/ChatMessages'
 import InputBar from '../components/InputBar'
-import GitHubInput from "../components/GitHubInput";
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 export default function Home() {
     const [messages, setMessages] = useState([])
@@ -126,17 +127,33 @@ return (
         </Head>
   
         <div className="h-screen flex flex-col bg-gray-800 text-gray-100 font-sans font-roboto">
-            <Header />
-            <GitHubInput clearMessages={clearMessages} />
+            <Header clearMessages={clearMessages} />
             <div className="flex-1 overflow-auto p-4">
                 <div className="flex justify-center space-x-4">
                     <ChatMessages messages={messages} onCollectCodeBlock={handleCollectCodeBlock} />
                     <div className="w-full md:w-1/2 md:max-w-xl">
                         {collectedCodeBlocks.map((code, index) => (
-                            <div key={index} className="mb-4 p-3 rounded-lg shadow-md whitespace-pre-wrap bg-gray-100 text-gray-800">
+                            <div
+                            key={index}
+                            className="mb-4 p-3 rounded-lg shadow-md whitespace-pre-wrap bg-gray-100 text-gray-800"
+                            style={{
+                                position: 'relative'
+                            }}
+                            >
+                            <SyntaxHighlighter
+                                style={oneDark}
+                                customStyle={{
+                                backgroundColor: "#2d2d2d",
+                                borderRadius: "0.375rem",
+                                padding: "1rem"
+                                }}
+                            >
                                 {code}
+                            </SyntaxHighlighter>
                             </div>
-                        ))}
+                        ))
+                        }
+
                     </div>
                 </div>
             </div>
