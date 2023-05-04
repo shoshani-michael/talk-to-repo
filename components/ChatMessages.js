@@ -25,6 +25,28 @@ const ChatMessages = ({ messages }) => {
     }
   };
 
+  const toggleButton = (
+    <button
+        style={{
+          position: 'absolute',
+          top: 0,
+          right: 0,
+          padding: '2px',
+          borderRadius: '2px',
+          borderBottomLeftRadius: '5px',
+          fontSize: '14px',
+          background: 'rgba(255, 255, 255, 0.1)',
+          color: 'gray',
+          cursor: 'pointer'
+      }}
+      onClick={() => {
+        setShowSystemMessages(!showSystemMessages);
+      }}
+    >
+      prompt
+    </button>
+  );
+  
   const getDisplayMessages = () => {
     if (showSystemMessages) {
       return messages;
@@ -165,15 +187,12 @@ const ChatMessages = ({ messages }) => {
       {getDisplayMessages().map((message, index) => (
         <div
           key={index}
+          style={{ position: 'relative' }}
           className={`mb-4 p-3 text-lg rounded-lg shadow-md whitespace-pre-wrap ${
             message.sender === 'user' ? 'bg-gray-100 text-gray-800' : 'bg-gray-600'
           }`}
-          onClick={() => {
-            if (message.sender === 'user') {
-              setShowSystemMessages(!showSystemMessages);
-            }
-          }}
         >
+          { (index === 0 || index === 1) && message.sender === 'user' && toggleButton} 
           {formatMessage(message.text)}
         </div>
       ))}
