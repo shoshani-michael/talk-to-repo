@@ -124,7 +124,7 @@ import subprocess
 
 def get_last_commits_messages(repo_path: str, n: int = 20) -> str:
     result = subprocess.run(
-        ["git", "-C", repo_path, "log", f"-n {n}", "--pretty=format:%s"],
+        ["git", "-C", repo_path, "log", f"-n {n}", "--pretty=format:%s%n%n%h %n----%n", "--name-status"],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
     )
