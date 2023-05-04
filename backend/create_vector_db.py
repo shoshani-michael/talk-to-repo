@@ -97,6 +97,7 @@ def process_file_list(temp_dir):
 def create_vector_db(REPO_URL):
     temp_dir = clone_from_github(REPO_URL)
     process_file_list(temp_dir)
+    return temp_dir
 
 if __name__ == '__main__':
     create_vector_db( os.environ["REPO_URL"] )

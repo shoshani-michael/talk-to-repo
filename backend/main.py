@@ -49,6 +49,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+LOCAL_REPO_PATH = ""
+
 pinecone.init(
     api_key=os.environ['PINECONE_API_KEY'],
     environment=os.environ['ENVIRONMENT']
@@ -118,6 +120,22 @@ def embedding_search(query, k):
 
     return docsearch.similarity_search(query, k=k)
 
+import subprocess
+
+def get_last_commits_messages(repo_path: str, n: int = 20) -> str:
+    result = subprocess.run(
+        ["git", "-C", repo_path, "log", f"-n {n}", "--pretty=format:%s"],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+
+    if result.returncode != 0:
+        raise Exception(f"Error getting commit messages: {result.stderr.decode('utf-8')}")
+
+    commit_messages = result.stdout.decode("utf-8").split("\n")
+
+    return "\n".join(commit_messages)
+
 @app.get("/health")
 def health():
     return "OK"
@@ -127,6 +145,8 @@ def system_message(query: Message):
     numdocs = int(os.environ['CONTEXT_NUM'])
     docs = embedding_search(query.text, k=numdocs)
     context = format_context(docs)
+    additional_context = get_last_commits_messages(LOCAL_REPO_PATH)
+
 
     prompt = """Given the following context and code, answer the following question. Do not use outside context, and do not assume the user can see the provided context. Try to be as detailed as possible and reference the components that you are looking at. Keep in mind that these are only code snippets, and more snippets may be added during the conversation.
     Do not generate code, only reference the exact code snippets that you have been provided with. If you are going to write code, make sure to specify the language of the code. For example, if you were writing Python, you would write the following:
@@ -138,9 +158,11 @@ def system_message(query: Message):
     Now, here is the relevant context: 
 
     Context: {context}
+
+    Commit messages: {additional_context}
     """
 
-    return {'system_message': prompt.format(context=context)}
+    return {'system_message': prompt.format(context=context, additional_context=additional_context)}
 
 @app.post("/chat_stream")
 async def chat_stream(chat: List[Message]):
@@ -237,6 +259,6 @@ def load_repo(repo_info: RepoInfo):
     index = pinecone.Index(pinecone_index)
     delete_response = index.delete(delete_all=True, namespace=namespace)
     
-    create_vector_db(REPO_URL)
-    
+    LOCAL_REPO_PATH = create_vector_db(REPO_URL)
+
     return {"status": "success", "message": "Repo loaded successfully"}
