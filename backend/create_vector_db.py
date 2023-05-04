@@ -53,7 +53,7 @@ def clone_from_github(REPO_URL):
 
 def is_unwanted_file(file_name):
     if (file_name.endswith('/') or 
-        any(f in file_name for f in ['.DS_Store', '.gitignore']) or 
+        any(f in file_name for f in ['.DS_Store', '.gitignore', 'package-lock.json']) or 
         any(file_name.endswith(ext) for ext in ['.png', '.jpg', '.jpeg', '.mp3', '.ico'])
     ):
         return True
