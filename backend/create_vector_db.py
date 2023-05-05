@@ -69,7 +69,16 @@ def is_unwanted_file(file_name):
             'composer.lock',
             'Gemfile.lock',
             ]) or 
-        any(file_name.endswith(ext) for ext in ['.png', '.jpg', '.jpeg', '.mp3', '.ico'])
+        any(file_name.endswith(ext) for ext in [
+            '.png', '.jpg', '.jpeg', '.mp3', '.ico',
+            '.gif', '.pdf', '.docx', '.ppt',
+            '.pptx', '.xls', '.xlsx', 'zip', '.tar',
+            '.gz', '.tgz', '.bz2', '.7z', '.rar',
+            '.exe', '.dll', '.so', '.o', '.a', '.out',
+            '.woff', '.woff2', '.ttf', '.eot', '.otf',
+            '.mp4', '.avi', '.mov', '.mpg', '.mpeg',
+            '.webm', '.mkv', '.wmv', '.flv', '.m4v'
+            ])
     ):
         return True
     return False
