@@ -47,40 +47,32 @@ function GitHubInput(props) {
   };
 
   return (
-
-    <div className="panel-container "
-    style={{position: 'fixed', left: 0, top: 0}}
-    > {}
+    <div className="fixed top-0 left-0 h-screen w-48 bg-gray-700 text-white p-4">
+      <h2 className="text-md font-medium mb-4">Load Repository</h2>
       <input
         type="text"
         value={username}
         placeholder="GitHub Username"
-        className="flex-1 p-2 border rounded-lg focus:outline-none focus:ring focus:border-blue-300 resize-none overflow-hidden bg-gray-600 text-gray-100"        
+        className="mb-2 w-full text-sm p-1 border rounded-lg focus:outline-none focus:ring focus:border-blue-300 resize-none overflow-hidden bg-gray-600 text-gray-100"        
         onChange={(e) => setUsername(e.target.value)}
       />
-      <br />
       <input
         type="text"
         value={repo}
         placeholder="Repository Name"
-        className="flex-1 p-2 border rounded-lg focus:outline-none focus:ring focus:border-blue-300 resize-none overflow-hidden bg-gray-600 text-gray-100"        
-          onChange={(e) => setRepo(e.target.value)}
+        className="mb-2 w-full text-sm p-1 border rounded-lg focus:outline-none focus:ring focus:border-blue-300 resize-none overflow-hidden bg-gray-600 text-gray-100"        
+        onChange={(e) => setRepo(e.target.value)}
       />
-      <br />
       <input
         type="text"
         value={token}
         placeholder="GitHub API Token"
-        className="flex-1 p-2 border rounded-lg focus:outline-none focus:ring focus:border-blue-300 resize-none overflow-hidden bg-gray-600 text-gray-100"
+        className="mb-2 w-full text-sm p-1 border rounded-lg focus:outline-none focus:ring focus:border-blue-300 resize-none overflow-hidden bg-gray-600 text-gray-100"
         onChange={(e) => setToken(e.target.value)}
       />
-      <br />
-      <button onClick={handleClick} className="ml-2 px-2 py-1 rounded-lg bg-blue-500 text-white focus:outline-none hover:bg-blue-600 md:ml-4 md:px-4 md:py-2">
+      <button onClick={handleClick} className="w-full mb-2 text-sm px-1 py-1 rounded-lg bg-blue-500 text-white focus:outline-none hover:bg-blue-600 md:px-2 md:py-1">
         Load Repo
       </button>
-      {loading && <span className="ml-2 animate-spin">&#9203;</span>}
-      {!loading && loadingStatus === 'success' && <span className="ml-2 text-green-500">&#10004;</span>}
-      {!loading && loadingStatus === 'error' && <span className="ml-2 text-red-500">&#10006;</span>}
     </div>
   );
 }
