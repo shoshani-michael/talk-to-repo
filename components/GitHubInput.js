@@ -17,6 +17,10 @@ function GitHubInput(props) {
     if (storedToken) setToken(storedToken);
   }, []);
 
+  const Spinner = () => (
+    <div className="animate-spin w-5 h-5 border-t-2 border-white border-solid rounded-full align-items-center " />
+  );
+  
   const handleClick = async () => {
     setLoading(true); // Start loading
     setLoadingStatus(null);
@@ -70,9 +74,19 @@ function GitHubInput(props) {
         className="mb-2 w-full text-sm p-1 border rounded-lg focus:outline-none focus:ring focus:border-blue-300 resize-none overflow-hidden bg-gray-600 text-gray-100"
         onChange={(e) => setToken(e.target.value)}
       />
-      <button onClick={handleClick} className="w-full mb-2 text-sm px-1 py-1 rounded-lg bg-blue-500 text-white focus:outline-none hover:bg-blue-600 md:px-2 md:py-1">
-        Load Repo
-      </button>
+   <button
+     onClick={handleClick}
+     className="w-full mb-2 text-sm px-1 py-1 rounded-lg bg-blue-500 text-white focus:outline-none hover:bg-blue-600 md:px-2 md:py-1 flex justify-center items-center"
+   >
+     {loading ? (
+       <Spinner />
+     ) : loadingStatus === 'success' ? (
+       <span>✔</span>
+     ) : (
+       'Load Repo'
+     )}
+   </button>
+   
     </div>
   );
 }
