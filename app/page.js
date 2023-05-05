@@ -114,60 +114,58 @@ export default function Home() {
     };
 
   
-return (
-    <>
-        <Head>
-            <title>Chat With the Twitter Algorithm</title>
-            <meta
-                name="description"
-                content="Chat with the Twitter algorithm."
-            />
-            <link rel="icon" href="/favicon.ico" />
-            <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
-        </Head>
-  
-        <div className="h-screen flex flex-col bg-gray-800 text-gray-100 font-sans font-roboto">
-            <Header clearMessages={clearMessages} />
-            <div className="flex-1 overflow-auto p-4">
-                <div className="flex justify-center space-x-4">
-                    <ChatMessages messages={messages} onCollectCodeBlock={handleCollectCodeBlock} />
-                    <div className="w-full md:w-1/2 md:max-w-xl">
-                        {collectedCodeBlocks.map((code, index) => (
-                            <div
-                            key={index}
-                            className="mb-4 p-3 rounded-lg shadow-md whitespace-pre-wrap bg-gray-100 text-gray-800"
-                            style={{
-                                position: 'relative'
-                            }}
-                            >
-                            <SyntaxHighlighter
-                                style={oneDark}
-                                customStyle={{
-                                backgroundColor: "#2d2d2d",
-                                borderRadius: "0.375rem",
-                                padding: "1rem"
-                                }}
-                            >
-                                {code}
-                            </SyntaxHighlighter>
-                            </div>
-                        ))
-                        }
-
+    return (
+        <>
+            <Head>
+                <title>Chat With the Twitter Algorithm</title>
+                <meta
+                    name="description"
+                    content="Chat with the Twitter algorithm."
+                />
+                <link rel="icon" href="/favicon.ico" />
+                <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
+            </Head>
+      
+            <div className="h-screen flex flex-col bg-gray-800 text-gray-100 font-sans font-roboto">
+                <Header clearMessages={clearMessages} />
+                <div className="flex-1 overflow-auto p-4">
+                    <div className="flex justify-center md:space-x-4">
+                        <div className="w-full md:flex-1 md:max-w-xl">
+                            <ChatMessages messages={messages} onCollectCodeBlock={handleCollectCodeBlock} />
+                            {collectedCodeBlocks.map((code, index) => (
+                                <div
+                                    key={index}
+                                    className="mb-4 p-3 rounded-lg shadow-md whitespace-pre-wrap bg-gray-100 text-gray-800"
+                                    style={{
+                                        position: 'relative'
+                                    }}
+                                >
+                                    <SyntaxHighlighter
+                                        style={oneDark}
+                                        customStyle={{
+                                            backgroundColor: "#2d2d2d",
+                                            borderRadius: "0.375rem",
+                                            padding: "1rem"
+                                        }}
+                                    >
+                                        {code}
+                                    </SyntaxHighlighter>
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 </div>
+    
+                <div className="border-t border-gray-700">
+                    <InputBar
+                        input={input}
+                        setInput={setInput}
+                        handleKeyDown={handleKeyDown}
+                        handleSubmit={handleSubmit}
+                    />
+                </div>
             </div>
-
-  
-            <div className="border-t border-gray-700">
-                <InputBar
-                    input={input}
-                    setInput={setInput}
-                    handleKeyDown={handleKeyDown}
-                    handleSubmit={handleSubmit}
-                />
-            </div>
-      </div>
-    </>
-  )
+        </>
+    );
+    
 }
