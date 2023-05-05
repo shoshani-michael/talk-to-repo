@@ -196,8 +196,9 @@ def system_message(query: Message):
     last_commits = get_last_commits_messages(LOCAL_REPO_PATH)
  
     prompt = """Given the following context and code, answer the following question. Do not use outside context, and do not assume the user can see the provided context. Try to be as detailed as possible and reference the components that you are looking at. Keep in mind that these are only code snippets, and more snippets may be added during the conversation.
-    Do not generate code, only reference the exact code snippets that you have been provided with. If you are going to write code, make sure to specify the language of the code. For example, if you were writing Python, you would write the following:
+    When writing code, make sure to specify the language of the code. For example, if you were writing Python, you would write the following:
 
+    `file_name.py line line_number:`
     ```python
     <python code goes here>
     ```
