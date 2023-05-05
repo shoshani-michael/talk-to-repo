@@ -170,6 +170,19 @@ def get_last_commits_messages(repo_path: str, n: int = 20) -> str:
 
     return "\n".join(commit_messages)
 
+def get_last_commit(repo_path):
+    result = subprocess.run(
+        ["git", "-C", repo_path, "rev-parse", "HEAD"],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+    
+    if result.returncode != 0:
+        raise Exception(f"Error getting the last commit hash: {result.stderr.decode('utf-8')}")
+    
+    last_commit_hash = result.stdout.decode("utf-8").strip()
+    return last_commit_hash
+
 @app.get("/health")
 def health():
     return "OK"
@@ -182,9 +195,6 @@ def system_message(query: Message):
     context = format_context(docs, LOCAL_REPO_PATH)
     last_commits = get_last_commits_messages(LOCAL_REPO_PATH)
  
-    numbered_commits = [f"{i}. {commit}" for i, commit in enumerate(last_commits.split('\n'))]
-    additional_context = '\n'.join(numbered_commits)
-
     prompt = """Given the following context and code, answer the following question. Do not use outside context, and do not assume the user can see the provided context. Try to be as detailed as possible and reference the components that you are looking at. Keep in mind that these are only code snippets, and more snippets may be added during the conversation.
     Do not generate code, only reference the exact code snippets that you have been provided with. If you are going to write code, make sure to specify the language of the code. For example, if you were writing Python, you would write the following:
 
@@ -196,10 +206,10 @@ def system_message(query: Message):
 
     Context: {context}
 
-    Commit messages: {additional_context}
+    Commit messages: {last_commits}
     """
 
-    return {'system_message': prompt.format(context=context, additional_context=additional_context)}
+    return {'system_message': prompt.format(context=context, last_commits=last_commits)}
 
 @app.post("/chat_stream")
 async def chat_stream(chat: List[Message]):
@@ -301,4 +311,6 @@ def load_repo(repo_info: RepoInfo):
     os.environ['LOCAL_REPO_PATH'] = LOCAL_REPO_PATH
     create_vector_db(REPO_URL, LOCAL_REPO_PATH)
 
-    return {"status": "success", "message": "Repo loaded successfully"}
+    last_commit = get_last_commit(LOCAL_REPO_PATH)
+    return {"status": "success", "message": "Repo loaded successfully", "last_commit": last_commit}
+    

@@ -6,6 +6,7 @@ function GitHubInput(props) {
   const [token, setToken] = useState("");
   const [loading, setLoading] = useState(false);
   const [loadingStatus, setLoadingStatus] = useState(null);
+  const [lastCommitHash, setLastCommitHash] = useState(null);
   
   useEffect(() => {
     const storedUsername = localStorage.getItem("username");
@@ -42,6 +43,7 @@ function GitHubInput(props) {
         localStorage.setItem("repo", repo);
         localStorage.setItem("token", token);
         props.clearMessages(); 
+        setLastCommitHash(data.last_commit);
       }
     } catch (error) {
       console.error(error);
@@ -86,7 +88,13 @@ function GitHubInput(props) {
        'Load Repo'
      )}
    </button>
-   
+   <div className="mt-2 text-sm text-gray-400 ">
+      {lastCommitHash && (
+        <p>
+          Last commit hash: <span className="font-semibold">{lastCommitHash}</span>
+        </p>
+      )}
+    </div>
     </div>
   );
 }
