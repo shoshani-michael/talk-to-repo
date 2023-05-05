@@ -27,6 +27,7 @@ export default function Home() {
       
     const clearMessages = () => {
         setMessages([]);
+        setCollectedCodeBlocks([]); 
     }
 
     const getSystemMessage = async (userInputMessage) => {
@@ -129,8 +130,8 @@ export default function Home() {
             <div className="h-screen flex flex-col bg-gray-800 text-gray-100 font-sans font-roboto">
                 <Header clearMessages={clearMessages} />
                 <div className="flex-1 overflow-auto p-4">
-                    <div className="flex justify-center md:space-x-4">
-                        <div className="w-full md:flex-1 md:max-w-xl">
+                    <div className="flex flex-wrap md:flex-nowrap justify-center md:space-x-4">
+                        <div className="w-full md:flex-1 md:max-w-xl order-last md:order-none">
                             <ChatMessages messages={messages} onCollectCodeBlock={handleCollectCodeBlock} />
                             {collectedCodeBlocks.map((code, index) => (
                                 <div
