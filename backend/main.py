@@ -113,7 +113,7 @@ def format_context(docs, LOCAL_REPO_PATH):
             aggregated_docs[document_id] = [d.page_content]
 
     context_parts = []
-    for document_id, content_parts in aggregated_docs.items():
+    for i, (document_id, content_parts) in enumerate(aggregated_docs.items()):
         # Calculate the token count of the entire file
         entire_file_token_count = corpus_summary.loc[corpus_summary["file_name"] == document_id]["n_tokens"].values[0]
 
@@ -126,10 +126,10 @@ def format_context(docs, LOCAL_REPO_PATH):
             print(f"Reading file {fname}")
             with open(fname, "r") as f:
                 file_contents = f.read()
-            context_parts.append(f'Full file {document_id}:\n' + file_contents)
+            context_parts.append(f'[{i}] Full file {document_id}:\n' + file_contents)
         else:
             # Include only the content_parts
-            context_parts.append(f'Snippets from file {document_id}:\n' + "\n---\n".join(content_parts))
+            context_parts.append(f'[{i}] From file {document_id}:\n' + "\n---\n".join(content_parts))
 
     context = "\n\n".join(context_parts)
 
@@ -180,8 +180,10 @@ def system_message(query: Message):
     numdocs = int(os.environ['CONTEXT_NUM'])
     docs = embedding_search(query.text, k=numdocs)
     context = format_context(docs, LOCAL_REPO_PATH)
-    additional_context = get_last_commits_messages(LOCAL_REPO_PATH)
-
+    last_commits = get_last_commits_messages(LOCAL_REPO_PATH)
+ 
+    numbered_commits = [f"{i}. {commit}" for i, commit in enumerate(last_commits.split('\n'))]
+    additional_context = '\n'.join(numbered_commits)
 
     prompt = """Given the following context and code, answer the following question. Do not use outside context, and do not assume the user can see the provided context. Try to be as detailed as possible and reference the components that you are looking at. Keep in mind that these are only code snippets, and more snippets may be added during the conversation.
     Do not generate code, only reference the exact code snippets that you have been provided with. If you are going to write code, make sure to specify the language of the code. For example, if you were writing Python, you would write the following:
