@@ -184,7 +184,7 @@ const ChatMessages = ({ messages, onCollectCodeBlock }) => {
   };
 
   return (
-    <div className="w-full md:w-1/2 md:max-w-xl">
+    <div className="flex-1">
       {getDisplayMessages().map((message, index) => (
         <div
           key={index}
