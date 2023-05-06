@@ -1,6 +1,7 @@
 import os
 import threading
 import queue
+import shutil
 
 from create_vector_db import create_vector_db
 
@@ -272,6 +273,20 @@ def get_local_repo_path():
 
 LOCAL_REPO_PATH = get_local_repo_path()
 
+def clear_local_repo_path():
+    global LOCAL_REPO_PATH
+
+    # Remove the existing temporary directory
+    shutil.rmtree(LOCAL_REPO_PATH)
+
+    # Create a new temporary directory
+    LOCAL_REPO_PATH = tempfile.mkdtemp()
+
+    # Update the cache file and environment variable
+    with open(".talk-to-repo-cache", "w") as f:
+        f.write(LOCAL_REPO_PATH)
+        os.environ['LOCAL_REPO_PATH'] = LOCAL_REPO_PATH
+
 @app.post("/chat_stream")
 async def chat_stream(chat: List[Message]):
     model_name = os.environ['MODEL_NAME']
@@ -355,6 +370,8 @@ async def chat_stream(chat: List[Message]):
 
 @app.post("/load_repo")
 def load_repo(repo_info: RepoInfo):
+    clear_local_repo_path()
+
     if repo_info.token:
         REPO_URL = f"https://{repo_info.token}@github.com/{repo_info.username}/{repo_info.repo}.git"
         os.environ['GITHUB_TOKEN'] = repo_info.token
