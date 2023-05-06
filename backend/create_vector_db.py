@@ -12,6 +12,7 @@ import re
 from urllib.request import urlopen
 import tempfile
 import subprocess
+import json
 
 # Import dotenv and load the variables from .env file
 from dotenv import load_dotenv
@@ -95,6 +96,14 @@ def process_file(file):
     n_tokens = len(encoder.encode(file_contents))
     return file_contents, n_tokens
 
+def file_contains_secrets(filename):
+    # Run the detect-secrets command on the temp file
+    result = subprocess.run(["python", "-m", "detect_secrets", "scan", filename], capture_output=True)
+    output = json.loads(result.stdout)
+
+    # Check if any secrets were detected in the file
+    return len(output["results"].get(filename, [])) > 0
+
 def process_file_list(temp_dir):
     corpus_summary = []
     file_texts, metadatas = [], []
@@ -105,14 +114,23 @@ def process_file_list(temp_dir):
                 file_path = os.path.join(root, filename)
                 if '.git' in file_path:
                     continue
-                with open(file_path, 'rb') as file:
+                with open(file_path, 'r') as file:                    
+
+                    if file_contains_secrets(file_path):
+                        os.remove(file_path)
+                        print(f"Deleted {file_path} as it contained secrets")
+                        continue
+                    
                     print(f'Processing {file_path}')
-                    file_contents, n_tokens = process_file(file)
+                    file_contents = file.read()
+                    n_tokens = len(encoder.encode(file_contents))
                     corpus_summary.append({'file_name': file_path, 'n_tokens': n_tokens})
                     file_texts.append(file_contents)
                     metadatas.append({'document_id': file_path})
 
     split_documents = splitter.create_documents(file_texts, metadatas=metadatas)
+   
+    print(f'Writing {len(split_documents)} documents to Pinecone')
     vector_store.from_documents(
         documents=split_documents,
         embedding=embeddings,
@@ -122,7 +140,6 @@ def process_file_list(temp_dir):
 
     pd.DataFrame.from_records(corpus_summary).to_csv('data/corpus_summary.csv', index=False)
 
-    return 
 
 def create_vector_db(REPO_URL, LOCAL_REPO_PATH):
     clone_from_github(REPO_URL, LOCAL_REPO_PATH)

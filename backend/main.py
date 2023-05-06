@@ -110,33 +110,6 @@ def create_tempfile_with_content(content):
     temp_file.close()
     return temp_file.name
 
-def file_contains_secrets(filename):
-    # Run the detect-secrets command on the temp file
-    result = subprocess.run(["python", "-m", "detect_secrets", "scan", filename], capture_output=True)
-    output = json.loads(result.stdout)
-
-    # Check if any secrets were detected in the file
-    return len(output["results"].get(filename, [])) > 0
-
-def filter_secrets(context):
-    # Split the context into code snippets
-    snippets = context.split("\\n\\n")
-
-    redacted_snippets = []
-    for snippet in snippets:
-        # Create a temp file with the contents of the snippet
-        temp_filename = create_tempfile_with_content(snippet)
-
-        # Check if the temp file contains secrets
-        if not file_contains_secrets(temp_filename):
-            # If no secrets, add the snippet to the redacted_snippets list
-            redacted_snippets.append(snippet)
-
-        # Delete the temporary file
-        os.remove(temp_filename)
-
-    # Combine redacted code snippets back into a single string
-    return "\\n\\n".join(redacted_snippets)
 
 def format_context(docs, LOCAL_REPO_PATH):
     # Load corpus_summary.csv
@@ -164,7 +137,6 @@ def format_context(docs, LOCAL_REPO_PATH):
             fname = os.path.join(LOCAL_REPO_PATH, document_id)
             with open(fname, "r") as f:
                 file_contents = f.read()
-            file_contents = filter_secrets(file_contents)
             context_parts.append(f'[{i}] Full file {document_id}:\n' + file_contents)
         else:
             # Include only the content_parts
@@ -172,7 +144,6 @@ def format_context(docs, LOCAL_REPO_PATH):
 
     context = "\n\n".join(context_parts)
 
-    context = filter_secrets(context)  
     return context
 
 def format_query(query, context):
