@@ -2,7 +2,7 @@
 
 Talk to any GitHub repository and ask questions about the codebase. This app provides an interactive way to explore and understand open-source projects.
 
-The app is publicly hosted here: https://talk-to-repo.vercel.app/. Instructions for hosting it yourself are provided below.
+The app will be hosted here: https://talk-to-repo.arjeo.com/. Instructions for hosting it yourself are provided below.
 
 ## Features
 
