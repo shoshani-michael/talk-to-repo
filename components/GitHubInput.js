@@ -52,6 +52,13 @@ function GitHubInput(props) {
     }
   };
 
+  const handleExportMessages = () => {
+    const data = JSON.stringify(props.messages, null, 2);
+    const blob = new Blob([data], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    window.open(url, '_blank');
+  };
+  
   return (
     <div className="fixed top-0 left-0 h-screen w-48 bg-gray-700 text-white p-4">
       <h2 className="text-md font-medium mb-4">Load Repository</h2>
@@ -95,6 +102,12 @@ function GitHubInput(props) {
         </p>
       )}
     </div>
+    <button
+      onClick={handleExportMessages}
+      className="w-full mb-2 text-sm px-1 py-1 rounded-lg bg-green-500 text-white focus:outline-none hover:bg-green-600 md:px-2 md:py-1 flex justify-center items-center"
+    >
+      Export Messages
+    </button>
     </div>
   );
 }

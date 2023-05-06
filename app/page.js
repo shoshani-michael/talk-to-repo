@@ -128,7 +128,7 @@ export default function Home() {
             </Head>
       
             <div className="h-screen flex flex-col bg-gray-800 text-gray-100 font-sans font-roboto">
-                <Header clearMessages={clearMessages} />
+                <Header clearMessages={clearMessages} messages={messages}  />
                 <div className="flex-1 overflow-auto p-4">
                     <div className="flex flex-wrap md:flex-nowrap justify-center md:space-x-4">
                         <div className="w-full md:flex-1 md:max-w-xl order-last md:order-none">
