@@ -44,8 +44,15 @@ def clone_from_github(REPO_URL, LOCAL_REPO_PATH):
     repo_url = REPO_URL
     token = os.environ["GITHUB_TOKEN"] if "GITHUB_TOKEN" in os.environ else None
 
-    print(f"Cloning {repo_url} into {temp_dir}")
-    subprocess.run(["git", "clone", repo_url, temp_dir], check=True)
+    # if the repo is already cloned, there's a .git/ folder, do git pull
+    if os.path.isdir(os.path.join(temp_dir, '.git')):
+        print(f"Pulling {repo_url} into {temp_dir}")
+        subprocess.run(["git", "pull"], cwd=temp_dir, check=True)
+    else:
+        # otherwise, clone the repo
+        print(f"Cloning {repo_url} into {temp_dir}")
+        subprocess.run(["git", "clone", repo_url, temp_dir], check=True)
+    
     return
 
 def is_unwanted_file(file_name):
