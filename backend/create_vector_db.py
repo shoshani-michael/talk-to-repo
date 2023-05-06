@@ -124,6 +124,7 @@ def process_file_list(temp_dir):
                     print(f'Processing {file_path}')
                     file_contents = file.read()
                     n_tokens = len(encoder.encode(file_contents))
+                    file_path = file_path.replace(temp_dir, '')
                     corpus_summary.append({'file_name': file_path, 'n_tokens': n_tokens})
                     file_texts.append(file_contents)
                     metadatas.append({'document_id': file_path})
