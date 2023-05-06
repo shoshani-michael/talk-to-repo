@@ -8,3 +8,4 @@ hypercorn
 gunicorn
 pandas
 python-dotenv
+detect_secrets

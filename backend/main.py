@@ -100,6 +100,45 @@ class ChainStreamHandler(StreamingStdOutCallbackHandler):
 
 encoder = tiktoken.get_encoding('cl100k_base')
 
+from detect_secrets import SecretsCollection
+from detect_secrets.settings import Settings
+
+def redact_secrets(text):
+    secrets = SecretsCollection()
+
+    # Create a configuration object with the desired settings
+    config = Settings()
+    config.disable_filters()
+
+    # Keep the text in a temporary file, get filename in f
+    f = tempfile.NamedTemporaryFile(mode="w", delete=False)
+    f.write(text)
+
+    f.close()
+
+    # Scan the text for secrets, using filename in f
+    secrets.scan_file(f.name)
+
+    #delete the temporary file
+    os.remove(f.name)
+
+    # Redact secrets from the text
+    redacted_text = text
+    for secret in secrets:
+        redacted_text = redacted_text.replace(secret.secret_value, "[REDACTED]")
+
+    return redacted_text
+
+
+def filter_secrets(context):
+    # Split the context into code snippets
+    snippets = context.split("\n\n")
+
+    # Redact secrets from each code snippet
+    redacted_snippets = [redact_secrets(snippet) for snippet in snippets]
+
+    # Combine redacted code snippets back into a single string
+    return "\n\n".join(redacted_snippets)
 def format_context(docs, LOCAL_REPO_PATH):
     # Load corpus_summary.csv
     corpus_summary = pd.read_csv("data/corpus_summary.csv")
@@ -134,6 +173,7 @@ def format_context(docs, LOCAL_REPO_PATH):
 
     context = "\n\n".join(context_parts)
 
+    context = filter_secrets(context)  
     return context
 
 def format_query(query, context):
