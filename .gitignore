@@ -42,3 +42,4 @@ fly.toml
 
 .venv
 backend/data
+backend/.talk-to-repo-cache
