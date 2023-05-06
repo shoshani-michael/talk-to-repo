@@ -40,6 +40,9 @@ origins = [
     "http://frontend:3000",
 ]
 
+additional_origins = os.environ["ALLOWED_ORIGINS"].split(',')
+origins.extend(additional_origins)
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
