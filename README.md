@@ -111,7 +111,7 @@ python -m venv .venv && source .venv/bin/activate
 python -m pip install -r requirements.txt
 ```
 
-6. Set up a Pinecone index. Give it a vector dimension of 1536 and name it `pinecone-index`. You can change this in `backend/main.py` if you want.
+6. Set up a Pinecone index. Give it a vector dimension of 1536 and name it `talk-to-repo`. 
 
 7. Run the backend server
 
