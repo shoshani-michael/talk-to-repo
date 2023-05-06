@@ -144,41 +144,38 @@ export default function Home() {
                 <Header clearMessages={clearMessages} messages={messages}  />
                 <div className="flex-1 overflow-auto p-4">
                     <div className="flex flex-wrap md:flex-nowrap justify-center md:space-x-4">
-                    <div className="w-full md:flex-1 md:max-w-xl order-last md:order-none">
-                        <ChatMessages messages={messages} onCollectCodeBlock={handleCollectCodeBlock} />
-                        {collectedCodeBlocks.map((code, index) => (
-                        <div
-                            key={index}
-                            className="absolute right-0 top-20 flex flex-col gap-4 z-20" 
-                            style={{
-                                overflow: "hidden", 
-                                transition: "max-height 0.3s ease", 
-                                maxHeight: expandedBlocks.has(index) ? "auto" : "20rem", 
-                                cursor: "pointer"  }}
-                        >
-                            
-                            <div
-                                
-                                className="mb-4 p-2 rounded-lg shadow-md whitespace-pre-wrap bg-gray-100 text-gray-800
-                                max-w-xs text-xs"
-                                style={{
-                                position: 'relative'
-                                }}
+                        <div className="w-full md:flex-1 md:max-w-xl order-last md:order-none">
+                        {/* Wrap ChatMessages and collected code blocks in a flex container */}
+                        <div className="flex justify-between">
+                            {/* Leave ChatMessages unchanged */}
+                            <ChatMessages
+                            messages={messages}
+                            onCollectCodeBlock={handleCollectCodeBlock}
+                            />
+
+                            {/* Add a new div for code blocks */}
+                            <div className="flex flex-col space-y-4">
+                            {collectedCodeBlocks.map((code, index) => (
+                                <div
+                                key={index}
+                                className="whitespace-pre-wrap bg-gray-100 text-gray-800
+                                max-w-xs text-xs p-2 rounded-lg shadow-md cursor-pointer"
                                 onClick={() => toggleCodeBlock(index)}
-                            >
+                                >
                                 <SyntaxHighlighter
-                                style={oneDark}
-                                customStyle={{
+                                    style={oneDark}
+                                    customStyle={{
                                     backgroundColor: "#2d2d2d",
                                     borderRadius: "0.375rem",
-                                    padding: "1rem"
-                                }}
+                                    padding: "1rem",
+                                    }}
                                 >
-                                {code}
+                                    {code}
                                 </SyntaxHighlighter>
-                            </div>
-                            </div>
+                                </div>
                             ))}
+                            </div>
+                        </div>
                         </div>
                     </div>
                 </div>
