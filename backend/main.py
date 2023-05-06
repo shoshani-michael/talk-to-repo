@@ -104,6 +104,31 @@ encoder = tiktoken.get_encoding('cl100k_base')
 import tempfile
 import json
 
+
+def get_local_repo_path():
+    if 'LOCAL_REPO_PATH' in os.environ:
+        print("Using LOCAL_REPO_PATH from environment variable")
+        LOCAL_REPO_PATH = os.environ['LOCAL_REPO_PATH']
+    else:
+        print("Using LOCAL_REPO_PATH from cache file")
+        if os.path.exists(".talk-to-repo-cache"):
+            with open(".talk-to-repo-cache", "r") as f:
+                LOCAL_REPO_PATH = f.read()
+        else:
+            print("Creating new LOCAL_REPO_PATH")
+            # Create a new temporary directory
+            LOCAL_REPO_PATH = tempfile.mkdtemp()
+   
+    # keep the path in a cache file and environment variable
+    with open(".talk-to-repo-cache", "w") as f:
+        f.write(LOCAL_REPO_PATH)
+        os.environ['LOCAL_REPO_PATH'] = LOCAL_REPO_PATH
+    
+    print(f"Using LOCAL_REPO_PATH: {LOCAL_REPO_PATH}")
+    return LOCAL_REPO_PATH
+
+LOCAL_REPO_PATH = get_local_repo_path()
+
 def create_tempfile_with_content(content):
     temp_file = tempfile.NamedTemporaryFile(mode="w", delete=False)
     temp_file.write(content)
@@ -134,7 +159,7 @@ def format_context(docs, LOCAL_REPO_PATH):
 
         if content_parts_token_count / entire_file_token_count > 0.5:
             # Include the entire file contents instead
-            fname = os.path.join(LOCAL_REPO_PATH, document_id)
+            fname = LOCAL_REPO_PATH + "/" + document_id
             with open(fname, "r") as f:
                 file_contents = f.read()
             context_parts.append(f'[{i}] Full file {document_id}:\n' + file_contents)
@@ -166,6 +191,27 @@ def embedding_search(query, k):
     return docsearch.similarity_search(query, k=k)
 
 import subprocess
+import openai
+
+def extract_key_words(query: str) -> str:
+
+    prompt = f"Extract from the following query the key words, \
+        which will be used to grep a codebase. \
+        Return the key words as a comma-separated list. \
+        Query: {query}"
+    
+    openai.api_key = os.environ['OPENAI_API_KEY']
+    response = openai.Completion.create(
+        engine="text-davinci-002",
+        prompt=prompt,
+        max_tokens=50,
+        n=1,
+        stop=None,
+        temperature=0.5,
+    )
+
+    key_words = response.choices[0].text.strip()
+    return key_words
 
 def get_last_commits_messages(repo_path: str, n: int = 20) -> str:
     result = subprocess.run(
@@ -200,11 +246,11 @@ def health():
 
 @app.post("/system_message", response_model=ContextSystemMessage)
 def system_message(query: Message):
-    LOCAL_REPO_PATH = os.environ['LOCAL_REPO_PATH']
     numdocs = int(os.environ['CONTEXT_NUM'])
     docs = embedding_search(query.text, k=numdocs)
     context = format_context(docs, LOCAL_REPO_PATH)
-    last_commits = get_last_commits_messages(LOCAL_REPO_PATH)
+    grep_context = grep_more_context(query)
+    last_commits = get_last_commits_messages(LOCAL_REPO_PATH, 5)
  
     prompt = """Given the following context and code, answer the following question. Do not use outside context, and do not assume the user can see the provided context. Try to be as detailed as possible and reference the components that you are looking at. Keep in mind that these are only code snippets, and more snippets may be added during the conversation.
     When writing code, make sure to specify the language of the code. For example, if you were writing Python, you would write the following:
@@ -218,29 +264,16 @@ def system_message(query: Message):
 
     Context: {context}
 
+    Grep Context: {grep_context}
+
     Commit messages: {last_commits}
     """
 
-    return {'system_message': prompt.format(context=context, last_commits=last_commits)}
-
-def get_local_repo_path():
-    if 'LOCAL_REPO_PATH' in os.environ:
-        LOCAL_REPO_PATH = os.environ['LOCAL_REPO_PATH']
-    else:
-        if os.path.exists(".talk-to-repo-cache"):
-            with open(".talk-to-repo-cache", "r") as f:
-                LOCAL_REPO_PATH = f.read()
-        else:
-            LOCAL_REPO_PATH = tempfile.mkdtemp()
-   
-    # keep the path in a cache file and environment variable
-    with open(".talk-to-repo-cache", "w") as f:
-        f.write(LOCAL_REPO_PATH)
-        os.environ['LOCAL_REPO_PATH'] = LOCAL_REPO_PATH
-        
-    return LOCAL_REPO_PATH
-
-LOCAL_REPO_PATH = get_local_repo_path()
+    return {'system_message': prompt.format(
+        context=context,
+        grep_context=grep_context,
+        last_commits=last_commits
+    )}
 
 def clear_local_repo_path():
     global LOCAL_REPO_PATH
@@ -255,6 +288,28 @@ def clear_local_repo_path():
     with open(".talk-to-repo-cache", "w") as f:
         f.write(LOCAL_REPO_PATH)
         os.environ['LOCAL_REPO_PATH'] = LOCAL_REPO_PATH
+
+def grep_more_context(query):
+    key_words = extract_key_words(query)
+    print(f"Key words: {key_words}")
+    context_from_key_words = ""
+    for keyword in key_words.split(','):
+        keyword = keyword.strip()
+        print(f"Working in directory: {LOCAL_REPO_PATH}")
+        output = subprocess.run(['git', 'grep', '-C 5', '-h', '-e', keyword, '--', '.' ], 
+            cwd=LOCAL_REPO_PATH,  
+            stdout=subprocess.PIPE,         
+            stderr=subprocess.PIPE,
+        ).stdout
+
+        # Add output from git grep command to the overall context
+        context_from_key_words += output.decode('utf-8') + "\n\n"
+        print(f"Context from key word: {context_from_key_words}")
+    
+    # limit context to 1000 characters
+    context_from_key_words = context_from_key_words[:1000]
+
+    return context_from_key_words
 
 @app.post("/chat_stream")
 async def chat_stream(chat: List[Message]):
@@ -294,10 +349,12 @@ async def chat_stream(chat: List[Message]):
                 query_messages = [system_message] + new_messages + [latest_query]
                 query_text = '\n'.join(query_messages)
 
+                context_from_key_words = grep_more_context(latest_query)
+
                 # add some more context
-                docs = embedding_search(query_text, k=2)
+                docs = embedding_search(query_text, k=5)
                 context = format_context(docs, LOCAL_REPO_PATH)
-                formatted_query = format_query(latest_query, context)
+                formatted_query = format_query(latest_query, context + context_from_key_words)
             else:
                 formatted_query = chat[-1].text
 
@@ -357,4 +414,3 @@ def load_repo(repo_info: RepoInfo):
 
     last_commit = get_last_commit(LOCAL_REPO_PATH)
     return {"status": "success", "message": "Repo loaded successfully", "last_commit": last_commit}
-    
