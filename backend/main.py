@@ -101,45 +101,43 @@ class ChainStreamHandler(StreamingStdOutCallbackHandler):
 
 encoder = tiktoken.get_encoding('cl100k_base')
 
-from detect_secrets import SecretsCollection
-from detect_secrets.settings import Settings
+import tempfile
+import json
 
-def redact_secrets(text):
-    secrets = SecretsCollection()
+def create_tempfile_with_content(content):
+    temp_file = tempfile.NamedTemporaryFile(mode="w", delete=False)
+    temp_file.write(content)
+    temp_file.close()
+    return temp_file.name
 
-    # Create a configuration object with the desired settings
-    config = Settings()
-    config.disable_filters()
+def file_contains_secrets(filename):
+    # Run the detect-secrets command on the temp file
+    result = subprocess.run(["detect-secrets", "scan", "--no-verify", "--all-files", filename], capture_output=True)
+    output = json.loads(result.stdout)
 
-    # Keep the text in a temporary file, get filename in f
-    f = tempfile.NamedTemporaryFile(mode="w", delete=False)
-    f.write(text)
-
-    f.close()
-
-    # Scan the text for secrets, using filename in f
-    secrets.scan_file(f.name)
-
-    #delete the temporary file
-    os.remove(f.name)
-
-    # Redact secrets from the text
-    redacted_text = text
-    for secret in secrets:
-        redacted_text = redacted_text.replace(secret.secret_value, "[REDACTED]")
-
-    return redacted_text
-
+    # Check if any secrets were detected in the file
+    return len(output["results"].get(filename, [])) > 0
 
 def filter_secrets(context):
     # Split the context into code snippets
-    snippets = context.split("\n\n")
+    snippets = context.split("\\n\\n")
 
-    # Redact secrets from each code snippet
-    redacted_snippets = [redact_secrets(snippet) for snippet in snippets]
+    redacted_snippets = []
+    for snippet in snippets:
+        # Create a temp file with the contents of the snippet
+        temp_filename = create_tempfile_with_content(snippet)
+
+        # Check if the temp file contains secrets
+        if not file_contains_secrets(temp_filename):
+            # If no secrets, add the snippet to the redacted_snippets list
+            redacted_snippets.append(snippet)
+
+        # Delete the temporary file
+        os.remove(temp_filename)
 
     # Combine redacted code snippets back into a single string
-    return "\n\n".join(redacted_snippets)
+    return "\\n\\n".join(redacted_snippets)
+
 def format_context(docs, LOCAL_REPO_PATH):
     # Load corpus_summary.csv
     corpus_summary = pd.read_csv("data/corpus_summary.csv")
