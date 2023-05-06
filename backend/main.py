@@ -210,10 +210,28 @@ def system_message(query: Message):
 
     return {'system_message': prompt.format(context=context, last_commits=last_commits)}
 
+def get_local_repo_path():
+    if 'LOCAL_REPO_PATH' in os.environ:
+        LOCAL_REPO_PATH = os.environ['LOCAL_REPO_PATH']
+    else:
+        if os.path.exists(".talk-to-repo-cache"):
+            with open(".talk-to-repo-cache", "r") as f:
+                LOCAL_REPO_PATH = f.read()
+        else:
+            LOCAL_REPO_PATH = tempfile.mkdtemp()
+   
+    # keep the path in a cache file and environment variable
+    with open(".talk-to-repo-cache", "w") as f:
+        f.write(LOCAL_REPO_PATH)
+        os.environ['LOCAL_REPO_PATH'] = LOCAL_REPO_PATH
+        
+    return LOCAL_REPO_PATH
+
+LOCAL_REPO_PATH = get_local_repo_path()
+
 @app.post("/chat_stream")
 async def chat_stream(chat: List[Message]):
     model_name = os.environ['MODEL_NAME']
-    LOCAL_REPO_PATH = os.environ['LOCAL_REPO_PATH']
     encoding_name = 'cl100k_base'
 
     def llm_thread(g, prompt):
@@ -305,9 +323,7 @@ def load_repo(repo_info: RepoInfo):
 
     index = pinecone.Index(pinecone_index)
     delete_response = index.delete(delete_all=True, namespace=namespace)
-
-    LOCAL_REPO_PATH = tempfile.mkdtemp()
-    os.environ['LOCAL_REPO_PATH'] = LOCAL_REPO_PATH
+    
     create_vector_db(REPO_URL, LOCAL_REPO_PATH)
 
     last_commit = get_last_commit(LOCAL_REPO_PATH)
