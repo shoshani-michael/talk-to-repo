@@ -162,9 +162,9 @@ def format_context(docs, LOCAL_REPO_PATH):
         if content_parts_token_count / entire_file_token_count > 0.5:
             # Include the entire file contents instead
             fname = os.path.join(LOCAL_REPO_PATH, document_id)
-            print(f"Reading file {fname}")
             with open(fname, "r") as f:
                 file_contents = f.read()
+            file_contents = filter_secrets(file_contents)
             context_parts.append(f'[{i}] Full file {document_id}:\n' + file_contents)
         else:
             # Include only the content_parts
