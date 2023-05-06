@@ -112,7 +112,7 @@ def create_tempfile_with_content(content):
 
 def file_contains_secrets(filename):
     # Run the detect-secrets command on the temp file
-    result = subprocess.run(["detect-secrets", "scan", "--no-verify", "--all-files", filename], capture_output=True)
+    result = subprocess.run(["python", "-m", "detect_secrets", "scan", filename], capture_output=True)
     output = json.loads(result.stdout)
 
     # Check if any secrets were detected in the file
