@@ -127,69 +127,62 @@ export default function Home() {
         });
     };
 
-  
-    return (
-        <>
-            <Head>
-                <title>Chat With the Twitter Algorithm</title>
-                <meta
-                    name="description"
-                    content="Chat with the Twitter algorithm."
-                />
-                <link rel="icon" href="/favicon.ico" />
-                <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
-            </Head>
-      
-            <div className="h-screen flex flex-col bg-gray-800 text-gray-100 font-sans font-roboto">
-                <Header clearMessages={clearMessages} messages={messages}  />
-                <div className="flex-1 overflow-auto p-4">
-                    <div className="flex flex-wrap md:flex-nowrap justify-center md:space-x-4">
-                        <div className="w-full md:flex-1 md:max-w-xl order-last md:order-none">
+    return (<>
+        <Head>
+            <title>Talk to Repo</title>
+            <meta
+                name="description"
+                content="Load any GitHub repository in a chat app."
+            />
+            <link rel="icon" href="/favicon.ico" />
+            <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
+        </Head>
+
+        <div className="h-screen flex flex-col bg-gray-800 text-gray-100 font-sans font-roboto">
+            <Header clearMessages={clearMessages} messages={messages}  />
+            <div className="flex-1 overflow-auto p-4">
+                <div className="flex flex-wrap md:flex-nowrap justify-center md:space-x-4">
+                    <div className="w-full md:w-2/3 md:max-w-xl order-last md:order-none">
                         {/* Wrap ChatMessages and collected code blocks in a flex container */}
                         <div className="flex justify-between">
-                            {/* Leave ChatMessages unchanged */}
-                            <ChatMessages
-                            messages={messages}
-                            onCollectCodeBlock={handleCollectCodeBlock}
-                            />
+                        {/* Leave ChatMessages unchanged */}
+                        <ChatMessages messages={messages} onCollectCodeBlock={handleCollectCodeBlock} />
 
-                            {/* Add a new div for code blocks */}
-                            <div className="flex flex-col space-y-4">
+                        {/* Add a new div for code blocks */}
+                        <div className="flex-1 md:ml-4 max-w-md overflow-auto">
                             {collectedCodeBlocks.map((code, index) => (
-                                <div
+                            <div
                                 key={index}
                                 className="whitespace-pre-wrap bg-gray-100 text-gray-800
-                                max-w-xs text-xs p-2 rounded-lg shadow-md cursor-pointer"
+                                max-w-xs text-xs p-2 rounded-lg shadow-md cursor-pointer my-2"
                                 onClick={() => toggleCodeBlock(index)}
-                                >
+                            >
                                 <SyntaxHighlighter
-                                    style={oneDark}
-                                    customStyle={{
+                                style={oneDark}
+                                customStyle={{
                                     backgroundColor: "#2d2d2d",
                                     borderRadius: "0.375rem",
                                     padding: "1rem",
-                                    }}
+                                }}
                                 >
-                                    {code}
+                                {code}
                                 </SyntaxHighlighter>
-                                </div>
-                            ))}
                             </div>
+                            ))}
                         </div>
                         </div>
                     </div>
                 </div>
-    
-                <div className="border-t border-gray-700">
-                    <InputBar
-                        input={input}
-                        setInput={setInput}
-                        handleKeyDown={handleKeyDown}
-                        handleSubmit={handleSubmit}
-                    />
-                </div>
             </div>
-        </>
-    );
-    
+
+            <div className="border-t border-gray-700">
+                <InputBar
+                    input={input}
+                    setInput={setInput}
+                    handleKeyDown={handleKeyDown}
+                    handleSubmit={handleSubmit}
+                />
+            </div>
+        </div>     
+    </>);    
 }
