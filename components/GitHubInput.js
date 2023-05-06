@@ -95,11 +95,11 @@ function GitHubInput(props) {
        'Load Repo'
      )}
    </button>
-   <div className="mt-2 text-sm text-gray-400 ">
-      {lastCommitHash && (
-        <p>
-          Last commit hash: <span className="font-semibold">{lastCommitHash}</span>
-        </p>
+   <div className="mt-2 w-full">
+     {lastCommitHash && (
+       <div className="text-sm text-gray-200 p-1 bg-gray-600 text-gray-100 rounded-lg break-words w-full">
+        Last commit hash: <span className="font-semibold">{lastCommitHash.slice(0, 10)}</span>
+       </div>
       )}
     </div>
     <button
