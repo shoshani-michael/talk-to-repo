@@ -121,7 +121,7 @@ const ChatMessages = ({ messages, onCollectCodeBlock }) => {
           </div>
         );
       } else {
-        return ( <span>{ part }</span>);
+        return ( <span key={index}> { part }</span>);
       }
     });
   };
