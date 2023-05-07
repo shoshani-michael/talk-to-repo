@@ -1,18 +1,22 @@
 # Talk to Repo
 
-Talk to any GitHub repository and ask questions about the codebase. This app provides an interactive way to explore and understand open-source projects.
+Talk to any GitHub repository and ask questions about the codebase. This app provides an interactive way to explore and understand and modify projects hosted on GitHub.
 
-The app will be hosted here: https://talk-to-repo.arjeo.com/. Instructions for hosting it yourself are provided below.
+The app is hosted here: https://talk-to-repo.arjeo.com/. Instructions for hosting it yourself are provided below.
 
 ## Features
 
 - Load any GitHub repository
-- Input a GitHub API token for authentication and increased rate limits
+- Input a GitHub API token for private repositories
+- When loading the repo, the app checks locally for any secrets in files and discards sensitive files to avoid sending secrets to the AI
+- Export the messages you see (currently to a new tab)
+- Collect code that is relevant for changes you wish to do
+- You can see the prompt used behind the scenes to generate the response
 - Docker support for easy deployment
 
 ## Basic architecture
 
-The app is a NextJS/Tailwind CSS frontend with a FastAPI backend. The frontend is hosted on Vercel, and the backend is hosted on a small node on [fly.io](https://fly.io/). The backend uses a Pinecone vector DB on the free tier.
+The app is a NextJS/Tailwind CSS frontend with a FastAPI backend. The backend uses a Pinecone vector DB on the free tier.
 
 Given any GitHub repository, this app allows users to chat, fetch information from the repository, and display it in a user-friendly conversation interface.
 
@@ -20,7 +24,7 @@ Given any GitHub repository, this app allows users to chat, fetch information fr
 
 The Talk to Repo app consists of two main components:
 
-1. **Frontend**: A web interface built using Next.js and Tailwind CSS for a modern, responsive design. Users interact with this interface to input repository information, authenticate using their GitHub API tokens, and ask questions about the content of the repository.
+### **Frontend**: A web interface built using Next.js and Tailwind CSS for a modern, responsive design. Users interact with this interface to input repository information, authenticate using their GitHub API tokens, and ask questions about the content of the repository.
 
    Key frontend components include:
 
@@ -28,21 +32,32 @@ The Talk to Repo app consists of two main components:
    - `ChatMessages.js`: Renders chat messages, including code snippets from the repository.
    - `GitHubInput.js`: Provides input fields for users to enter GitHub repository and API token information.
 
-2. **Backend**: A FastAPI server responsible for processing user input, fetching data from the GitHub repository, and returning relevant repository information as chat messages.
+### **Backend**: A FastAPI server responsible for processing user input, fetching data from the GitHub repository, and returning relevant repository information as chat messages.
 
    Key backend components include:
 
-   - Endpoints for loading repositories
-   - Endpoints for processing chat requests
-   - Endpoints for fetching CSV data
+#### `/load_repo`: (POST)
 
-### Communication
+- Used to load repository information.
+- Expected parameters:
+  - `username`: The repository's owner's GitHub username (string)
+  - `repo`: The name of the repository (string)
+  - `token`: The GitHub API token for authentication (string). Pass an empty string for public repositories.
 
-The frontend communicates with the backend via RESTful APIs. User input and repository details are sent as API requests to the backend, which processes the requests, fetches relevant data from the GitHub repository, and returns the responses as chat messages to be displayed by the frontend.
+#### `/chat_stream`: (POST)
 
-### Deployment
+- Used to process chat requests and stream responses.
+- Expected parameters:
+  - `updatedMessages`: A list of chat message objects containing a `text` attribute (string) and a `role` attribute (either "system", "user", or "assistant").
 
-The frontend is hosted on Vercel, and the backend is hosted on a small node on [fly.io](https://fly.io/). Instructions for deploying the app locally, as well as launching it with Docker, are provided in the README file.
+#### `/fetch_CSV_data`: (GET)
+
+- Used to fetch CSV data from the specified file.
+- Expected parameters:
+  - `file_path`: The file path of the CSV file inside the repository (string)
+  - `delimiter`: The delimiter used in the CSV file (string). Defaults to ','.
+
+Note that `/load_repo` and `/chat_stream` are POST requests, while `/fetch_CSV_data` is a GET request.
 
 ## Running with Docker Compose
 
