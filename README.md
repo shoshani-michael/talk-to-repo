@@ -50,13 +50,6 @@ The Talk to Repo app consists of two main components:
 - Expected parameters:
   - `updatedMessages`: A list of chat message objects containing a `text` attribute (string) and a `role` attribute (either "system", "user", or "assistant").
 
-#### `/fetch_CSV_data`: (GET)
-
-- Used to fetch CSV data from the specified file.
-- Expected parameters:
-  - `file_path`: The file path of the CSV file inside the repository (string)
-  - `delimiter`: The delimiter used in the CSV file (string). Defaults to ','.
-
 Note that `/load_repo` and `/chat_stream` are POST requests, while `/fetch_CSV_data` is a GET request.
 
 ## Running with Docker Compose
@@ -138,8 +131,12 @@ Now, you can access the app at `http://localhost:3000`.
 
 ## Potential improvements
 
-- The dependency on Pinecone could be removed and replaced with a simple NumPy array. I just wanted to try Pinecone.
+- The dependency on Pinecone could be removed and replaced with a local vector database
 - Replace the `chat_stream` endpoint with a WebSocket implementation to improve real-time communication.
-- Ask the model not to generatively reference its sources. Instead, simply copy the code snippet directly.
 - The splitter could be improved. Right now, it's a character splitter that favors newlines, but OpenAI has implemented a similar one that splits on tokens instead.
 - Get inspired by Replit's Ghostwriter for the embeddings and retrieval mechanisms, to account for the hierarchy of code structure
+- Use [Tree-Sitter](https://github.com/tree-sitter) to traverse the repo and create embedding at the function / module level
+
+## Credit
+
+Big thanks to [@mtenenholtz](https://github.com/mtenenholtz), who published [chat-twitter](https://twitter.com/marktenenholtz/status/1651568107192983553). This project started thanks to the embed-query-generate loop from that project.
