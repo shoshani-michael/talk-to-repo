@@ -142,34 +142,32 @@ export default function Home() {
             <Header clearMessages={clearMessages} messages={messages}  />
             <div className="flex-1 overflow-auto p-4">
                 <div className="flex flex-wrap md:flex-nowrap justify-center md:space-x-4">
-                    <div className="w-full md:w-3/4 md:max-w-xl order-last md:order-none">
-                        {/* Wrap ChatMessages and collected code blocks in a flex container */}
-                        <div className="flex justify-between">
-                        {/* Leave ChatMessages unchanged */}
-                        <ChatMessages messages={messages} onCollectCodeBlock={handleCollectCodeBlock} />
-
-                        {/* Add a new div for code blocks */}
-                        <div className="flex-1 md:ml-4 max-w-md overflow-auto">
-                            {collectedCodeBlocks.map((code, index) => (
-                            <div
-                                key={index}
-                                className="whitespace-pre-wrap bg-gray-100 text-gray-800
-                                max-w-xs text-xs p-2 rounded-lg shadow-md cursor-pointer my-2"
-                                onClick={() => toggleCodeBlock(index)}
-                            >
-                                <SyntaxHighlighter
-                                style={oneDark}
-                                customStyle={{
-                                    backgroundColor: "#2d2d2d",
-                                    borderRadius: "0.375rem",
-                                    padding: "1rem",
-                                }}
-                                >
-                                {code}
-                                </SyntaxHighlighter>
+                    <div className="w-full md:w-3/4 xl:w-3/5 md:max-w-screen-md order-last md:order-none">
+                        <div className="flex justify-between h-full">
+                            <div className="w-full lg:w-3/5 overflow-auto">
+                                <ChatMessages messages={messages} onCollectCodeBlock={handleCollectCodeBlock} />
                             </div>
-                            ))}
-                        </div>
+                            <div className="w-full lg:w-2/5 lg:ml-4 overflow-auto">
+                                {collectedCodeBlocks.map((code, index) => (
+                                    <div
+                                        key={index}
+                                        className="whitespace-pre-wrap bg-gray-100 text-gray-800
+                                            max-w-md text-xs p-2 rounded-lg shadow-md cursor-pointer my-2"
+                                        onClick={() => toggleCodeBlock(index)}
+                                    >
+                                        <SyntaxHighlighter
+                                            style={oneDark}
+                                            customStyle={{
+                                                backgroundColor: "#2d2d2d",
+                                                borderRadius: "0.375rem",
+                                                padding: "1rem",
+                                            }}
+                                        >
+                                            {code}
+                                        </SyntaxHighlighter>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     </div>
                 </div>
