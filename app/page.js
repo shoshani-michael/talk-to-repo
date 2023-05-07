@@ -142,7 +142,7 @@ export default function Home() {
             <Header clearMessages={clearMessages} messages={messages}  />
             <div className="flex-1 overflow-auto p-4">
                 <div className="flex flex-wrap md:flex-nowrap justify-center md:space-x-4">
-                    <div className="w-full md:w-2/3 md:max-w-xl order-last md:order-none">
+                    <div className="w-full md:w-3/4 md:max-w-xl order-last md:order-none">
                         {/* Wrap ChatMessages and collected code blocks in a flex container */}
                         <div className="flex justify-between">
                         {/* Leave ChatMessages unchanged */}
