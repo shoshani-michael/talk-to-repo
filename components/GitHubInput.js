@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { FaCheck } from 'react-icons/fa';
+
 
 function GitHubInput(props) {
   const [username, setUsername] = useState("");
@@ -7,7 +9,8 @@ function GitHubInput(props) {
   const [loading, setLoading] = useState(false);
   const [loadingStatus, setLoadingStatus] = useState(null);
   const [lastCommitHash, setLastCommitHash] = useState(null);
-  
+  const [hostingPlatform, setHostingPlatform] = useState("github");
+
   useEffect(() => {
     const storedUsername = localStorage.getItem("username");
     const storedRepo = localStorage.getItem("repo");
@@ -30,7 +33,7 @@ function GitHubInput(props) {
       const response = await fetch(process.env.NEXT_PUBLIC_BACKEND_URL + "/load_repo", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, repo, token }), 
+        body: JSON.stringify({ hostingPlatform, username, repo, token }), 
       });
 
       const data = await response.json();
@@ -83,6 +86,15 @@ function GitHubInput(props) {
         className="mb-2 w-full text-sm p-1 border rounded-lg focus:outline-none focus:ring focus:border-blue-300 resize-none overflow-hidden bg-gray-600 text-gray-100"
         onChange={(e) => setToken(e.target.value)}
       />
+      <select
+        className="mb-2 w-full"
+        value={hostingPlatform}
+        onChange={(e) => setHostingPlatform(e.target.value)}
+      >
+        <option value="github">GitHub</option>
+        <option value="gitlab">BitBucket</option>
+        <option value="bitbucket">BitBucket</option>
+      </select>
    <button
      onClick={handleClick}
      className="w-full mb-2 text-sm px-1 py-1 rounded-lg bg-blue-500 text-white focus:outline-none hover:bg-blue-600 md:px-2 md:py-1 flex justify-center items-center"

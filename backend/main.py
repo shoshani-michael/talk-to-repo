@@ -59,6 +59,7 @@ pinecone.init(
 )
 
 class RepoInfo(BaseModel):
+    hostingPlatform: str
     username: str
     repo: str
     token: Optional[str] = None
@@ -398,11 +399,26 @@ async def chat_stream(chat: List[Message]):
 def load_repo(repo_info: RepoInfo):
     clear_local_repo_path()
 
-    if repo_info.token:
-        REPO_URL = f"https://{repo_info.token}@github.com/{repo_info.username}/{repo_info.repo}.git"
-        os.environ['GITHUB_TOKEN'] = repo_info.token
+    print(f"Loading repo: {repo_info.repo}")
+    if repo_info.hostingPlatform == "github":
+        if repo_info.token:
+            REPO_URL = f"https://{repo_info.token}@github.com/{repo_info.username}/{repo_info.repo}.git"
+        else:
+            REPO_URL = f"https://github.com/{repo_info.username}/{repo_info.repo}.git"
+    elif repo_info.hostingPlatform == "gitlab":
+        if repo_info.token:
+            REPO_URL = f"https://oauth2:{repo_info.token}@gitlab.com/{repo_info.username}/{repo_info.repo}.git"
+        else:
+            REPO_URL = f"https://gitlab.com/{repo_info.username}/{repo_info.repo}.git"
+    elif repo_info.hostingPlatform == "bitbucket":
+        if repo_info.token:
+            REPO_URL = f"https://x-token-auth:{repo_info.token}@bitbucket.org/{repo_info.username}/{repo_info.repo}.git"
+        else:
+            REPO_URL = f"https://bitbucket.org/{repo_info.username}/{repo_info.repo}.git"
     else:
-        REPO_URL = f"https://github.com/{repo_info.username}/{repo_info.repo}.git"
+        return {"status": "error", "message": "Invalid hosting platform"}
+
+    os.environ['GITHUB_TOKEN'] = repo_info.token
 
     pinecone_index = os.environ['PINECONE_INDEX']
     namespace = os.environ['NAMESPACE']
