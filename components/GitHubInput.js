@@ -83,6 +83,15 @@ function GitHubInput(props) {
   return (
     <div className="fixed top-0 left-0 h-screen w-48 bg-gray-700 text-white p-4">
       <h2 className="text-md font-medium mb-4">Load Repository</h2>
+      <select
+        className="mb-2 w-full text-sm p-1 border rounded-lg focus:outline-none focus:ring focus:border-blue-300 resize-none overflow-hidden bg-gray-600 text-gray-100"
+        value={hostingPlatform}
+        onChange={(e) => setHostingPlatform(e.target.value)}
+      >
+        <option value="github">GitHub</option>
+        <option value="gitlab">GitLab</option>
+        <option value="bitbucket">BitBucket</option>
+      </select>
       <input
         type="text"
         value={username}
@@ -100,19 +109,10 @@ function GitHubInput(props) {
       <input
         type="text"
         value={token}
-        placeholder="GitHub API Token"
+        placeholder="Repository Access Token"
         className="mb-2 w-full text-sm p-1 border rounded-lg focus:outline-none focus:ring focus:border-blue-300 resize-none overflow-hidden bg-gray-600 text-gray-100"
         onChange={(e) => setToken(e.target.value)}
       />
-      <select
-        className="mb-2 w-full"
-        value={hostingPlatform}
-        onChange={(e) => setHostingPlatform(e.target.value)}
-      >
-        <option value="github">GitHub</option>
-        <option value="gitlab">BitBucket</option>
-        <option value="bitbucket">BitBucket</option>
-      </select>
    <button
      onClick={handleClick}
      className="w-full mb-2 text-sm px-1 py-1 rounded-lg bg-blue-500 text-white focus:outline-none hover:bg-blue-600 md:px-2 md:py-1 flex justify-center items-center"
@@ -120,7 +120,7 @@ function GitHubInput(props) {
      {loading ? (
        <Spinner />
      ) : loadingStatus === 'success' ? (
-       <span>✔</span>
+       <FaCheck />
      ) : (
        'Load Repo'
      )}
