@@ -61,7 +61,23 @@ function GitHubInput(props) {
     const url = URL.createObjectURL(blob);
     window.open(url, '_blank');
   };
+
+  const handleImportMessages = (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
   
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const messages = JSON.parse(event.target.result);
+        props.importMessages(messages);
+      } catch (error) {
+        console.error('Error importing messages:', error);
+      }
+    };
+    reader.readAsText(file);
+  };
+
   return (
     <div className="fixed top-0 left-0 h-screen w-48 bg-gray-700 text-white p-4">
       <h2 className="text-md font-medium mb-4">Load Repository</h2>
@@ -120,6 +136,20 @@ function GitHubInput(props) {
     >
       Export Messages
     </button>
+      <input
+        type="file"
+        accept=".json"
+        style={{ display: 'none' }}
+        onChange={handleImportMessages}
+        //ref={(inputRef) => (fileInput = inputRef)}
+      />
+
+      <button
+        onClick={() => fileInput.click()}
+        className="w-full mb-2 text-sm px-1 py-1 rounded-lg bg-green-500 text-white focus:outline-none hover:bg-green-600 md:px-2 md:py-1 flex justify-center items-center"
+      >
+        Import Messages
+      </button>
     </div>
   );
 }
