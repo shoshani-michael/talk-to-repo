@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { FaCheck } from 'react-icons/fa';
 
 
@@ -10,6 +10,8 @@ function GitHubInput(props) {
   const [loadingStatus, setLoadingStatus] = useState(null);
   const [lastCommitHash, setLastCommitHash] = useState(null);
   const [hostingPlatform, setHostingPlatform] = useState("github");
+
+  const fileInput = useRef(null);
 
   useEffect(() => {
     const storedUsername = localStorage.getItem("username");
@@ -141,11 +143,11 @@ function GitHubInput(props) {
         accept=".json"
         style={{ display: 'none' }}
         onChange={handleImportMessages}
-        //ref={(inputRef) => (fileInput = inputRef)}
+        ref={fileInput}
       />
 
       <button
-        onClick={() => fileInput.click()}
+        onClick={() => fileInput.current.click()}
         className="w-full mb-2 text-sm px-1 py-1 rounded-lg bg-green-500 text-white focus:outline-none hover:bg-green-600 md:px-2 md:py-1 flex justify-center items-center"
       >
         Import Messages
