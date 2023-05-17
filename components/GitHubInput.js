@@ -152,6 +152,12 @@ function GitHubInput(props) {
       >
         Import Messages
       </button>
+      <button
+        className="w-full mb-2 text-sm px-1 py-1 rounded-lg bg-red-500 text-white focus:outline-none hover:bg-red-600 md:px-2 md:py-1 flex justify-center items-center"
+        onClick={props.handleCommitCodeSnippets}
+      >
+        Create Commit
+      </button>
     </div>
   );
 }

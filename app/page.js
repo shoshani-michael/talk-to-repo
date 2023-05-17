@@ -59,6 +59,29 @@ export default function Home() {
         return { text: systemMessage.system_message, sender: 'systemMessage' }
     }
 
+    const handleCommitCodeSnippets = async () => {
+        try {
+          const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/create_commit`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(collectedCodeBlocks.map(block => ({ snippet: block }))),
+          });
+      
+          if (!response.ok) {
+            throw new Error('Error creating commit');
+          }
+      
+          const data = await response.json();
+          if (data.status === 'success') {
+            console.log('Commit created successfully');
+          } else {
+            console.error('Error creating commit');
+          }
+        } catch (error) {
+          console.error('Error creating commit:', error);
+        }
+      };
+      
     const handleSubmit = async (e) => {
         e.preventDefault()
 
@@ -143,7 +166,12 @@ export default function Home() {
         </Head>
 
         <div className="h-screen flex flex-col bg-gray-800 text-gray-100 font-sans font-roboto">
-            <Header importMessages={importMessages} clearMessages={clearMessages} messages={messages}  />
+            <Header 
+                importMessages={importMessages} 
+                clearMessages={clearMessages} 
+                messages={messages}  
+                handleCommitCodeSnippets={handleCommitCodeSnippets}
+            />
             <div className="flex-1 overflow-auto p-4">
                 <div className="flex flex-wrap md:flex-nowrap justify-center md:space-x-4">
                     <div className="w-full md:w-3/4 xl:w-3/5 md:max-w-screen-md order-last md:order-none">

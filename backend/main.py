@@ -430,3 +430,20 @@ def load_repo(repo_info: RepoInfo):
 
     last_commit = get_last_commit(LOCAL_REPO_PATH)
     return {"status": "success", "message": "Repo loaded successfully", "last_commit": last_commit}
+
+
+class CodeSnippet(BaseModel):
+    snippet: str
+
+def create_commit_from_snippets(snippets: List[CodeSnippet]):
+    # Here you'll implement the logic to create a commit from the provided snippets.
+    # For now, we'll just print the snippets and return True as a placeholder.
+    for snippet in snippets:
+        print(snippet.snippet)
+    return True
+
+
+@app.post("/create_commit")
+def create_commit(snippets: List[CodeSnippet]):
+    success = create_commit_from_snippets(snippets)
+    return {'status': 'success' if success else 'error'}

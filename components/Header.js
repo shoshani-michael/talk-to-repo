@@ -9,6 +9,7 @@ const Header = (props) => {
         importMessages={props.importMessages}
         clearMessages={props.clearMessages}
         messages={props.messages}
+        handleCommitCodeSnippets={props.handleCommitCodeSnippets}
       />
       <div className="pt-2 text-center text-xs text-gray-400">
         <a
