@@ -432,7 +432,7 @@ def load_repo(repo_info: RepoInfo):
     last_commit = get_last_commit(LOCAL_REPO_PATH)
     return {"status": "success", "message": "Repo loaded successfully", "last_commit": last_commit}
 
-def call_gpt3(query, max_tokens, n=1, temperature=0.5) -> str:
+def call_gpt3(query, max_tokens, n=1, temperature=0.0) -> str:
     response = openai.Completion.create(
         engine="text-davinci-003",
         prompt=query,
@@ -456,7 +456,7 @@ def generate_code_change(snippet: str, file_path: str) -> str:
         file_content = file.read()
 
     # Set up the query
-    query = f"Given the code snippet below and the content of the file {file_path}:\n\n--- Code Snippet ---\n{snippet}\n\n--- File Content ---\n{file_content}\n\nGenerate a diff for the file {file_path}:"
+    query = f"Given the content of the file {file_path} and the changes that we wish to apply provided in the code snippet:\n\n--- Code Snippet ---\n{snippet}\n\n--- File Content ---\n{file_content}\n\nGenerate a diff for the file {file_path}, start immediately with `diff ` :"
 
     # Get the diff using GPT-3 with increased max_tokens
     diff = call_gpt3(query, 500)
@@ -471,15 +471,21 @@ def generate_commit_message() -> str:
     return commit_message
 
 def apply_diff_to_file(diff: str, file_path: str) -> None:
-    # patch_data = patch.fromstring(diff)
-    # is_successful = patch_data.apply(root=file_path)
+    # save the diff to temp file
+    with open(LOCAL_REPO_PATH + "/temp.diff", "w") as file:
+        file.write(diff)
 
-    print(diff)
-    is_successful = True
-    
-    if not is_successful:
+    # call git apply with the diff, and check if it was successful
+    result = subprocess.run(
+        ["git", "apply", "temp.diff"], 
+        cwd=LOCAL_REPO_PATH,
+        capture_output=True
+    )
+    if not result.returncode == 0:
         raise Exception(f"Failed to apply diff to file: {file_path}")
 
+    # remove the temp file
+    os.remove("temp.diff")
 
 class CodeSnippet(BaseModel):
     snippet: str
