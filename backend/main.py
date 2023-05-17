@@ -2,6 +2,7 @@ import os
 import threading
 import queue
 import shutil
+import patch
 
 from create_vector_db import create_vector_db
 
@@ -256,8 +257,8 @@ def system_message(query: Message):
     prompt = """Given the following context and code, answer the following question. Do not use outside context, and do not assume the user can see the provided context. Try to be as detailed as possible and reference the components that you are looking at. Keep in mind that these are only code snippets, and more snippets may be added during the conversation.
     When writing code, make sure to specify the language of the code. For example, if you were writing Python, you would write the following:
 
-    `file_name.py line line_number:`
     ```python
+    # /path/to/file.py line: 1234 (the line number is optional)
     <python code goes here>
     ```
     
@@ -431,15 +432,77 @@ def load_repo(repo_info: RepoInfo):
     last_commit = get_last_commit(LOCAL_REPO_PATH)
     return {"status": "success", "message": "Repo loaded successfully", "last_commit": last_commit}
 
+def call_gpt3(query, max_tokens, n=1, temperature=0.5) -> str:
+    response = openai.Completion.create(
+        engine="text-davinci-003",
+        prompt=query,
+        max_tokens=max_tokens,
+        n=n,
+        stop=None,
+        temperature=temperature,
+    )
+
+    return response.choices[0].text.strip()
+
+def grep_file_from_snippet(snippet: str) -> str:
+    query = f"In this code snippet:\n\n{snippet}\n\nWhich file should be changed? Please only provide the full file path and nothing else."
+    file_path = LOCAL_REPO_PATH + call_gpt3(query, 50)
+    
+    return file_path
+
+def generate_code_change(snippet: str, file_path: str) -> str:
+    # Read the file content
+    with open(file_path, "r") as file:
+        file_content = file.read()
+
+    # Set up the query
+    query = f"Given the code snippet below and the content of the file {file_path}:\n\n--- Code Snippet ---\n{snippet}\n\n--- File Content ---\n{file_content}\n\nGenerate a diff for the file {file_path}:"
+
+    # Get the diff using GPT-3 with increased max_tokens
+    diff = call_gpt3(query, 500)
+
+    return diff
+
+
+def generate_commit_message() -> str:
+    query = "Generate a commit message for changes in these(code snippets) files."
+    commit_message = call_gpt3(query, 20)
+
+    return commit_message
+
+def apply_diff_to_file(diff: str, file_path: str) -> None:
+    # patch_data = patch.fromstring(diff)
+    # is_successful = patch_data.apply(root=file_path)
+
+    print(diff)
+    is_successful = True
+    
+    if not is_successful:
+        raise Exception(f"Failed to apply diff to file: {file_path}")
+
 
 class CodeSnippet(BaseModel):
     snippet: str
 
 def create_commit_from_snippets(snippets: List[CodeSnippet]):
-    # Here you'll implement the logic to create a commit from the provided snippets.
-    # For now, we'll just print the snippets and return True as a placeholder.
+    # Iterate through the snippets
     for snippet in snippets:
-        print(snippet.snippet)
+        # Use grep to figure out which file to change
+        file_path = grep_file_from_snippet(snippet.snippet)
+        
+        # Generate a diff using GPT-3
+        diff = generate_code_change(snippet.snippet, file_path)
+
+        # Apply the diff
+        apply_diff_to_file(diff, file_path)
+
+    # Use GPT-3 to generate a commit message
+    commit_message = generate_commit_message()
+
+    # Create a commit with all the changes
+    subprocess.run(["git", "add", "."])
+    subprocess.run(["git", "commit", "-m", commit_message])
+
     return True
 
 
