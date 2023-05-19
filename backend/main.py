@@ -467,7 +467,7 @@ def generate_code_change(snippet: str, file_path: str) -> str:
 
     # Set up the query
     query = f"Given the content of the file {file_path} and the changes that we wish to apply provided in the code snippet:\n\n--- File Content ---\n{file_content}\n---\n\n\n--- Code Snippet ---\n{snippet}ֿֿ\n---\n\
-    Generate a diff for the file {file_path}, which will be applied using the command `git apply temp.diff --unidiff-zero --inaccurate-eof --allow-empty --ignore-whitespace`. \
+    Generate a concise diff for the file {file_path}, which will be applied using the command `git apply temp.diff --unidiff-zero`. \
     Start immediately with `diff ` :"
 
     # Get the diff using ChatGPT
@@ -483,7 +483,7 @@ def generate_code_change(snippet: str, file_path: str) -> str:
     response = llm(messages)
 
     # Get the diff from the response
-    diff = response.content
+    diff = response.content + "\n"
 
     return diff
 
@@ -511,9 +511,6 @@ def apply_diff_to_file(diff: str, file_path: str) -> None:
     )
     if not result.returncode == 0:
         raise Exception(f"Failed to apply diff to file: {file_path}")
-
-    # remove the temp file
-    os.remove("temp.diff")
 
 class CodeSnippet(BaseModel):
     snippet: str
