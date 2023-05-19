@@ -255,11 +255,15 @@ def system_message(query: Message):
     last_commits = get_last_commits_messages(LOCAL_REPO_PATH, 5)
  
     prompt = """Given the following context and code, answer the following question. Do not use outside context, and do not assume the user can see the provided context. Try to be as detailed as possible and reference the components that you are looking at. Keep in mind that these are only code snippets, and more snippets may be added during the conversation.
-    When writing code, make sure to specify the language of the code. For example, if you were writing Python, you would write the following:
+    When writing code, make sure to specify the language of the code. When generating code, if it's a code change, be concise, include 1 surrounding line around each change. 
+    The generated code snippet will be used to create a git diff which will be applied to the code. 
+    For example, if you were generating Python, you would write the following:
 
     ```python
-    # /path/to/file.py line: 1234 (the line number is optional)
+    # relative/path/file.py line: 1234 (the line number is optional, no leading slash in file path)
+    # a line of context right before the changed code
     <python code goes here>
+    # a line of context right after the changed code
     ```
     
     Now, here is the relevant context: 
@@ -445,23 +449,44 @@ def call_gpt3(query, max_tokens, n=1, temperature=0.0) -> str:
     return response.choices[0].text.strip()
 
 def grep_file_from_snippet(snippet: str) -> str:
-    query = f"In this code snippet:\n\n{snippet}\n\nWhich file should be changed? Please only provide the full file path and nothing else."
-    file_path = LOCAL_REPO_PATH + call_gpt3(query, 50)
+    # keep first line of snippet:
+    snippet = snippet.split("\n")[0]
+    query = f"In this code snippet:\n\n{snippet}\n\n What's the full file name? Please only provide the file path and nothing else."
+    file_path = call_gpt3(query, 50)
     
     return file_path
 
 def generate_code_change(snippet: str, file_path: str) -> str:
+    print(f"Local repo path: {LOCAL_REPO_PATH}")
+    fullpath = os.path.join(LOCAL_REPO_PATH, file_path)
+    print(f"fullpath: {fullpath}")
+
     # Read the file content
-    with open(file_path, "r") as file:
+    with open(fullpath, "r") as file:
         file_content = file.read()
 
     # Set up the query
-    query = f"Given the content of the file {file_path} and the changes that we wish to apply provided in the code snippet:\n\n--- Code Snippet ---\n{snippet}\n\n--- File Content ---\n{file_content}\n\nGenerate a diff for the file {file_path}, start immediately with `diff ` :"
+    query = f"Given the content of the file {file_path} and the changes that we wish to apply provided in the code snippet:\n\n--- File Content ---\n{file_content}\n---\n\n\n--- Code Snippet ---\n{snippet}ֿֿ\n---\n\
+    Generate a diff for the file {file_path}, which will be applied using the command `git apply temp.diff --unidiff-zero --inaccurate-eof --allow-empty --ignore-whitespace`. \
+    Start immediately with `diff ` :"
 
-    # Get the diff using GPT-3 with increased max_tokens
-    diff = call_gpt3(query, 500)
+    # Get the diff using ChatGPT
+    chat_gpt_model = os.environ['MODEL_NAME']
+    messages = [
+        SystemMessage(content="You are an AI code assistant. Generate a diff for the provided file and code snippet."),
+        HumanMessage(content=query)
+    ]
+
+    llm  = ChatOpenAI(
+        model=chat_gpt_model,
+    )
+    response = llm(messages)
+
+    # Get the diff from the response
+    diff = response.messages[1].content
 
     return diff
+
 
 
 def generate_commit_message() -> str:
@@ -474,6 +499,9 @@ def apply_diff_to_file(diff: str, file_path: str) -> None:
     # save the diff to temp file
     with open(LOCAL_REPO_PATH + "/temp.diff", "w") as file:
         file.write(diff)
+
+    # debug
+    print(f"Applying diff to file: {file_path}, CWD: {LOCAL_REPO_PATH}")
 
     # call git apply with the diff, and check if it was successful
     result = subprocess.run(
@@ -506,8 +534,8 @@ def create_commit_from_snippets(snippets: List[CodeSnippet]):
     commit_message = generate_commit_message()
 
     # Create a commit with all the changes
-    subprocess.run(["git", "add", "."])
-    subprocess.run(["git", "commit", "-m", commit_message])
+    subprocess.run(["git", "add", "."], cwd=LOCAL_REPO_PATH)
+    subprocess.run(["git", "commit", "-m", commit_message], cwd=LOCAL_REPO_PATH)
 
     return True
 
