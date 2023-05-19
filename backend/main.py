@@ -254,19 +254,24 @@ def system_message(query: Message):
     grep_context = grep_more_context(query)
     last_commits = get_last_commits_messages(LOCAL_REPO_PATH, 5)
  
-    prompt = """Given the following context and code, answer the following question. Do not use outside context, and do not assume the user can see the provided context. Try to be as detailed as possible and reference the components that you are looking at. Keep in mind that these are only code snippets, and more snippets may be added during the conversation.
-    When writing code, make sure to specify the language of the code. When generating code, if it's a code change, be concise, include 1 surrounding line around each change. 
-    The generated code snippet will be used to create a git diff which will be applied to the code. 
+    prompt = """Given the following context and code, answer the following question. Do not use outside context, and do not assume the user can see the provided context. \
+    Try to be as detailed as possible and reference the components that you are looking at. Keep in mind that these are only code snippets, and more snippets may be added during the conversation. \
+    When generating code, if it's a code change, produce a concise diff. \
+    Please pay attention to produce the correct indentation so that the diffs apply correctly. \
+    The markup should be of type `diff` (after the three backticks), and then start with `diff --git`.
+    The generated diff will later be applied to the code, as is. 
+
+    When writing existing or new code (not diffs), make sure to specify the language of the code. \
     For example, if you were generating Python, you would write the following:
 
     ```python
     # relative/path/file.py line: 1234 (the line number is optional, no leading slash in file path)
-    # a line of context right before the changed code
+    # a line of context right before the relevant code
     <python code goes here>
-    # a line of context right after the changed code
+    # a line of context right after the relevant code
     ```
     
-    Now, here is the relevant context: 
+    Now, here is the relevant context, each context piece is seperated by a line of dashes: 
 
     Context: {context}
 
@@ -468,7 +473,8 @@ def generate_code_change(snippet: str, file_path: str) -> str:
     # Set up the query
     query = f"Given the content of the file {file_path} and the changes that we wish to apply provided in the code snippet:\n\n--- File Content ---\n{file_content}\n---\n\n\n--- Code Snippet ---\n{snippet}ֿֿ\n---\n\
     Generate a concise diff for the file {file_path}, which will be applied using the command `git apply temp.diff --unidiff-zero`. \
-    Start immediately with `diff ` :"
+    Please pay attention to produce the correct indentation so that the diffs apply correctly. \
+    Don't write markup, start immediately with `diff --git` :"
 
     # Get the diff using ChatGPT
     chat_gpt_model = os.environ['MODEL_NAME']
