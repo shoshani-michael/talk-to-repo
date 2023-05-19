@@ -483,7 +483,7 @@ def generate_code_change(snippet: str, file_path: str) -> str:
     response = llm(messages)
 
     # Get the diff from the response
-    diff = response.messages[1].content
+    diff = response.content
 
     return diff
 
@@ -505,7 +505,7 @@ def apply_diff_to_file(diff: str, file_path: str) -> None:
 
     # call git apply with the diff, and check if it was successful
     result = subprocess.run(
-        ["git", "apply", "temp.diff"], 
+        ["git", "apply", "temp.diff", "--unidiff-zero", "--inaccurate-eof", "--allow-empty", "--ignore-whitespace"], 
         cwd=LOCAL_REPO_PATH,
         capture_output=True
     )
