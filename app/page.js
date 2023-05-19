@@ -64,7 +64,7 @@ export default function Home() {
           const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/create_commit`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(collectedCodeBlocks.map(block => ({ snippet: block }))),
+            body: JSON.stringify(collectedCodeBlocks.map(block => ({ diff: block }))),
           });
       
           if (!response.ok) {

@@ -461,39 +461,6 @@ def grep_file_from_snippet(snippet: str) -> str:
     
     return file_path
 
-def generate_code_change(snippet: str, file_path: str) -> str:
-    print(f"Local repo path: {LOCAL_REPO_PATH}")
-    fullpath = os.path.join(LOCAL_REPO_PATH, file_path)
-    print(f"fullpath: {fullpath}")
-
-    # Read the file content
-    with open(fullpath, "r") as file:
-        file_content = file.read()
-
-    # Set up the query
-    query = f"Given the content of the file {file_path} and the changes that we wish to apply provided in the code snippet:\n\n--- File Content ---\n{file_content}\n---\n\n\n--- Code Snippet ---\n{snippet}ֿֿ\n---\n\
-    Generate a concise diff for the file {file_path}, which will be applied using the command `git apply temp.diff --unidiff-zero`. \
-    Please pay attention to produce the correct indentation so that the diffs apply correctly. \
-    Don't write markup, start immediately with `diff --git` :"
-
-    # Get the diff using ChatGPT
-    chat_gpt_model = os.environ['MODEL_NAME']
-    messages = [
-        SystemMessage(content="You are an AI code assistant. Generate a diff for the provided file and code snippet."),
-        HumanMessage(content=query)
-    ]
-
-    llm  = ChatOpenAI(
-        model=chat_gpt_model,
-    )
-    response = llm(messages)
-
-    # Get the diff from the response
-    diff = response.content + "\n"
-
-    return diff
-
-
 
 def generate_commit_message() -> str:
     query = "Generate a commit message for changes in these(code snippets) files."
@@ -518,18 +485,16 @@ def apply_diff_to_file(diff: str, file_path: str) -> None:
     if not result.returncode == 0:
         raise Exception(f"Failed to apply diff to file: {file_path}")
 
-class CodeSnippet(BaseModel):
-    snippet: str
+class CodeDiffs(BaseModel):
+    diff: str
 
-def create_commit_from_snippets(snippets: List[CodeSnippet]):
-    # Iterate through the snippets
-    for snippet in snippets:
+def create_commit_from_diffs(diffs: List[CodeDiffs]):
+    # Iterate through the diffs
+    for code_diff in diffs:
+        diff = code_diff.diff
         # Use grep to figure out which file to change
-        file_path = grep_file_from_snippet(snippet.snippet)
+        file_path = grep_file_from_snippet(diff)
         
-        # Generate a diff using GPT-3
-        diff = generate_code_change(snippet.snippet, file_path)
-
         # Apply the diff
         apply_diff_to_file(diff, file_path)
 
@@ -544,6 +509,6 @@ def create_commit_from_snippets(snippets: List[CodeSnippet]):
 
 
 @app.post("/create_commit")
-def create_commit(snippets: List[CodeSnippet]):
-    success = create_commit_from_snippets(snippets)
+def create_commit(diffs: List[CodeDiffs]):
+    success = create_commit_from_diffs(diffs)
     return {'status': 'success' if success else 'error'}
