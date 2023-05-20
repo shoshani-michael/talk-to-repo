@@ -258,8 +258,26 @@ def system_message(query: Message):
     Try to be as detailed as possible and reference the components that you are looking at. Keep in mind that these are only code snippets, and more snippets may be added during the conversation. \
     When generating code, if it's a code change, produce a concise diff. \
     Please pay attention to produce the correct indentation so that the diffs apply correctly. \
-    The markup should be of type `diff` (after the three backticks), and then start with `diff --git`.
+    The markup should be of type `diff` (after the three backticks), and then start with `diff --git`. \
+    Don't include an index line. When counting the number of lines in the patch, make sure not to add a line for the line count itself. \
+    Also don't break lines inside html tags, it would create bad diffs.\
     The generated diff will later be applied to the code, as is. 
+
+    For example, here's a correctly generated diff:
+
+    ```diff
+    diff --git a/relative/path/file.py b/relative/path/file.py
+    --- a/relative/path/file.py
+    +++ b/relative/path/file.py
+    @@ -1234,5 +1234,6 @@ def say_hello():
+         a = "hello"
+         b = " everyone"
+    -    print(a, b)
+    +    print(a, b, "!")
+    +    print("hello again")
+         c = 1 + 2
+         return c
+    ```
 
     When writing existing or new code (not diffs), make sure to specify the language of the code. \
     For example, if you were generating Python, you would write the following:
@@ -472,6 +490,7 @@ def apply_diff_to_file(diff: str, file_path: str) -> None:
     # save the diff to temp file
     with open(LOCAL_REPO_PATH + "/temp.diff", "w") as file:
         file.write(diff)
+        file.write("\n")
 
     # debug
     print(f"Applying diff to file: {file_path}, CWD: {LOCAL_REPO_PATH}")
