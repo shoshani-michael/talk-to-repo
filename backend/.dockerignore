@@ -41,3 +41,4 @@ build
 fly.toml
 embeddings_exploration.ipynb
 .venv/*
+.talk-to-repo-cache

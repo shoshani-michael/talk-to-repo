@@ -1,4 +1,4 @@
-FROM python:3.9.16
+FROM python:3.10-slim
 
 # Install some basic utilities.
 RUN apt-get update && apt-get install -y \
