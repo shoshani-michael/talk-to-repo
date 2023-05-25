@@ -377,8 +377,10 @@ async def chat_stream(chat: List[Message]):
 
     def llm_thread(g, prompt):
         try:
-            # llm = get_llm(g)
-            llm = get_llm_anthropic(g)
+            if os.environ['USE_ANTHROPIC'] == 'true':
+                llm = get_llm_anthropic(g) 
+            else:
+                llm = get_llm(g)
 
             encoding = tiktoken.get_encoding(encoding_name)
 
