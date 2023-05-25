@@ -13,12 +13,14 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
 from langchain.chat_models import ChatOpenAI
+from langchain.chat_models import ChatAnthropic
+
 from langchain.schema import (
     AIMessage,
     HumanMessage,
     SystemMessage
 )
-from langchain.callbacks.base import CallbackManager
+from langchain.callbacks.manager import AsyncCallbackManager
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.vectorstores import Pinecone
@@ -340,22 +342,43 @@ def grep_more_context(query):
 
     return context_from_key_words
 
-@app.post("/chat_stream")
-async def chat_stream(chat: List[Message]):
+def get_llm(g):
     model_name = os.environ['MODEL_NAME']
-    encoding_name = 'cl100k_base'
 
-    def llm_thread(g, prompt):
-        try:
-            llm = ChatOpenAI(
+    llm = ChatOpenAI(
                 model_name=model_name,
                 verbose=True,
                 streaming=True,
-                callback_manager=CallbackManager([ChainStreamHandler(g)]),
+                callback_manager=AsyncCallbackManager([ChainStreamHandler(g)]),
                 temperature=os.environ['TEMPERATURE'],
                 openai_api_key=os.environ['OPENAI_API_KEY'],
                 openai_organization=os.environ['OPENAI_ORG_ID']
             )
+    return llm
+
+def get_llm_anthropic(g):
+    model_name = "claude-v1-100k"
+
+    llm = ChatAnthropic(
+                model=model_name,
+                verbose=True,
+                streaming=True,
+                max_tokens_to_sample=1000,
+                callback_manager=AsyncCallbackManager([ChainStreamHandler(g)]),
+                temperature=os.environ['TEMPERATURE'],
+                anthropic_api_key=os.environ['ANTHROPIC_API_KEY']
+            )   
+    return llm
+
+
+@app.post("/chat_stream")
+async def chat_stream(chat: List[Message]):
+    encoding_name = 'cl100k_base'
+
+    def llm_thread(g, prompt):
+        try:
+            # llm = get_llm(g)
+            llm = get_llm_anthropic(g)
 
             encoding = tiktoken.get_encoding(encoding_name)
 
