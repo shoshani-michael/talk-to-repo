@@ -13,6 +13,7 @@ from urllib.request import urlopen
 import tempfile
 import subprocess
 import json
+from pathlib import Path
 
 # Import dotenv and load the variables from .env file
 from dotenv import load_dotenv
@@ -139,6 +140,7 @@ def process_file_list(temp_dir):
         namespace=os.environ['NAMESPACE']
     )
 
+    Path("data").mkdir(parents=True, exist_ok=True)
     pd.DataFrame.from_records(corpus_summary).to_csv('data/corpus_summary.csv', index=False)
 
 
