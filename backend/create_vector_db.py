@@ -51,76 +51,11 @@ def clone_from_github(REPO_URL, LOCAL_REPO_PATH):
     return
 
 
-def is_unwanted_file(file_name):
+def is_unwanted_file(file_name, unwanted_files, unwanted_extensions):
     if (
         file_name.endswith("/")
-        or any(
-            f in file_name
-            for f in [
-                ".DS_Store",
-                ".gitignore",
-                "package-lock.json",
-                "yarn.lock",
-                "Podfile.lock",
-                "Cartfile.resolved",
-                "mix.lock",
-                "Pipfile.lock",
-                "go.sum",
-                "Cargo.lock",
-                "Gopkg.lock",
-                "Berksfile.lock",
-                "npm-shrinkwrap.json",
-                "rebar.lock",
-                "pubspec.lock",
-                "composer.lock",
-                "Gemfile.lock",
-            ]
-        )
-        or any(
-            file_name.endswith(ext)
-            for ext in [
-                ".png",
-                ".jpg",
-                ".jpeg",
-                ".mp3",
-                ".ico",
-                ".gif",
-                ".pdf",
-                ".docx",
-                ".ppt",
-                ".pptx",
-                ".xls",
-                ".xlsx",
-                "zip",
-                ".tar",
-                ".gz",
-                ".tgz",
-                ".bz2",
-                ".7z",
-                ".rar",
-                ".exe",
-                ".dll",
-                ".so",
-                ".o",
-                ".a",
-                ".out",
-                ".woff",
-                ".woff2",
-                ".ttf",
-                ".eot",
-                ".otf",
-                ".mp4",
-                ".avi",
-                ".mov",
-                ".mpg",
-                ".mpeg",
-                ".webm",
-                ".mkv",
-                ".wmv",
-                ".flv",
-                ".m4v",
-            ]
-        )
+        or any(f in file_name for f in unwanted_files)
+        or any(file_name.endswith(ext) for ext in unwanted_extensions)
     ):
         return True
     return False
@@ -144,12 +79,17 @@ def file_contains_secrets(filename):
 
 
 def process_file_list(temp_dir):
+    with open(".db-ignore-files.txt", "r") as f:
+        unwanted_files = tuple(f.read().strip().splitlines())
+    with open(".db-ignore-extensions.txt", "r") as f:
+        unwanted_extensions = tuple(f.read().strip().splitlines())
+
     corpus_summary = []
     file_texts, metadatas = [], []
 
     for root, _, files in os.walk(temp_dir):
         for filename in files:
-            if not is_unwanted_file(filename):
+            if not is_unwanted_file(filename, unwanted_files, unwanted_extensions):
                 file_path = os.path.join(root, filename)
                 if ".git" in file_path:
                     continue
