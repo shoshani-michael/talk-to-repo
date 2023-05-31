@@ -266,56 +266,18 @@ def system_message(query: Message):
     context = format_context(docs, LOCAL_REPO_PATH)
     grep_context = grep_more_context(query)
     last_commits = get_last_commits_messages(LOCAL_REPO_PATH, 5)
+    with open("query-preamble.txt", "r") as f:
+        query_preamble = f.read().strip()
 
-    prompt = """Given the following context and code, answer the following question. Do not use outside context, and do not assume the user can see the provided context. \
-    Try to be as detailed as possible and reference the components that you are looking at. Keep in mind that these are only code snippets, and more snippets may be added during the conversation. \
-    When generating code, if it's a code change, produce a concise diff. \
-    Please pay attention to produce the correct indentation so that the diffs apply correctly. \
-    The markup should be of type `diff` (after the three backticks), and then start with `diff --git`. \
-    Don't include an index line. When counting the number of lines in the patch, make sure not to add a line for the line count itself. \
-    Also don't break lines inside html tags, it would create bad diffs.\
-    The generated diff will later be applied to the code, as is.
-
-    For example, here's a correctly generated diff:
-
-    ```diff
-    diff --git a/relative/path/file.py b/relative/path/file.py
-    --- a/relative/path/file.py
-    +++ b/relative/path/file.py
-    @@ -1234,5 +1234,6 @@ def say_hello():
-         a = "hello"
-         b = " everyone"
-    -    print(a, b)
-    +    print(a, b, "!")
-    +    print("hello again")
-         c = 1 + 2
-         return c
-    ```
-
-    When writing existing or new code (not diffs), make sure to specify the language of the code. \
-    For example, if you were generating Python, you would write the following:
-
-    ```python
-    # relative/path/file.py line: 1234 (the line number is optional, no leading slash in file path)
-    # a line of context right before the relevant code
-    <python code goes here>
-    # a line of context right after the relevant code
-    ```
-
-    Now, here is the relevant context, each context piece is seperated by a line of dashes:
-
-    Context: {context}
-
-    Grep Context: {grep_context}
-
-    Commit messages: {last_commits}
-    """
-
-    return {
-        "system_message": prompt.format(
-            context=context, grep_context=grep_context, last_commits=last_commits
-        )
-    }
+    prompt = "\n\n".join(
+        [
+            query_preamble,
+            f"Context:\n{context}",
+            f"Grep Context:\n{grep_context}",
+            f"Commit messages:\n{last_commits}",
+        ]
+    )
+    return dict(system_message=prompt)
 
 
 def clear_local_repo_path():
