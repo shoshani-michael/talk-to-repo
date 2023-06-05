@@ -1,0 +1,17 @@
+.DS_Store
+.gitignore
+package-lock.json
+yarn.lock
+Podfile.lock
+Cartfile.resolved
+mix.lock
+Pipfile.lock
+go.sum
+Cargo.lock
+Gopkg.lock
+Berksfile.lock
+npm-shrinkwrap.json
+rebar.lock
+pubspec.lock
+composer.lock
+Gemfile.lock

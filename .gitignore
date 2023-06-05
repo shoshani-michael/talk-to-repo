@@ -41,5 +41,6 @@ embeddings_exploration.ipynb
 fly.toml
 
 .venv
+backend/venv
 backend/data
 backend/.talk-to-repo-cache
