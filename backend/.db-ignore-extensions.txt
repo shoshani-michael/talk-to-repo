@@ -38,3 +38,5 @@ zip
 .wmv
 .flv
 .m4v
+.bin
+.wasm

@@ -100,7 +100,12 @@ def process_file_list(temp_dir):
                         continue
 
                     print(f"Processing {file_path}")
-                    file_contents = file.read()
+                    try:
+                        file_contents = file.read()
+                    except UnicodeDecodeError:
+                        print(f"Skipping {file_path} as it could not be decoded")
+                        continue
+                    
                     n_tokens = len(encoder.encode(file_contents))
                     file_path = file_path.replace(temp_dir, "").lstrip("/")
                     corpus_summary.append(
