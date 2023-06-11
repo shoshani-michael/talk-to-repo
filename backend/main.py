@@ -477,6 +477,7 @@ def load_repo(repo_info: RepoInfo):
     namespace = os.environ["NAMESPACE"]
 
     index = pinecone.Index(pinecone_index)
+
     index.delete(delete_all=True, namespace=namespace)
 
     create_vector_db(REPO_URL, LOCAL_REPO_PATH)
@@ -529,8 +530,10 @@ def apply_diff_to_file(diff: str, file_path: str) -> None:
 
     # debug
     print(f"Applying diff to file: {file_path}, CWD: {LOCAL_REPO_PATH}")
+    print(diff)
 
     # call git apply with the diff, and check if it was successful
+    #"--unidiff-zero",
     result = subprocess.run(
         [
             "git",
@@ -544,8 +547,10 @@ def apply_diff_to_file(diff: str, file_path: str) -> None:
         cwd=LOCAL_REPO_PATH,
         capture_output=True,
     )
+#     result.check_returncode()
     if not result.returncode == 0:
-        raise Exception(f"Failed to apply diff to file: {file_path}")
+        print(f"Error message: {result.stderr.decode('utf-8')}")
+        raise Exception(f"Failed to apply diff to file: {file_path} , return code: {result.returncode}")
 
 
 class CodeDiffs(BaseModel):

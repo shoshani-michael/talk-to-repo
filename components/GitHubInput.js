@@ -3,8 +3,8 @@ import { FaCheck } from 'react-icons/fa';
 
 
 function GitHubInput(props) {
-  const [username, setUsername] = useState("");
-  const [repo, setRepo] = useState("");
+  const [username, setUsername] = useState("shoshani-michael");
+  const [repo, setRepo] = useState("talk-to-repo");
   const [token, setToken] = useState("");
   const [loading, setLoading] = useState(false);
   const [loadingStatus, setLoadingStatus] = useState(null);

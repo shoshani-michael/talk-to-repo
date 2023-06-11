@@ -68,6 +68,7 @@ def process_file(file):
 
 
 def file_contains_secrets(filename):
+    return False #TODO-M:delete this line
     # Run the detect-secrets command on the temp file
     result = subprocess.run(
         ["python", "-m", "detect_secrets", "scan", filename], capture_output=True
@@ -102,16 +103,19 @@ def process_file_list(temp_dir):
                     print(f"Processing {file_path}")
                     file_contents = file.read()
                     n_tokens = len(encoder.encode(file_contents))
+                    start_index = 0
                     file_path = file_path.replace(temp_dir, "").lstrip("/")
                     corpus_summary.append(
                         {"file_name": file_path, "n_tokens": n_tokens}
                     )
                     file_texts.append(file_contents)
-                    metadatas.append({"document_id": file_path})
+                    metadatas.append({"document_id": file_path , "start_index": start_index})
+                    start_index += n_tokens
 
     split_documents = splitter.create_documents(file_texts, metadatas=metadatas)
 
     print(f"Writing {len(split_documents)} documents to Pinecone")
+    print(os.environ["PINECONE_INDEX"] + " " + os.environ["NAMESPACE"])
     vector_store.from_documents(
         documents=split_documents,
         embedding=embeddings,
