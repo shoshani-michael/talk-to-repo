@@ -138,14 +138,19 @@ def format_context(docs, LOCAL_REPO_PATH):
 
     for d in docs:
         document_id = d.metadata["document_id"]
+        start_location = str((d.metadata["start_line"] , d.metadata["start_position"]))
+        end_location = str((d.metadata["end_line"] , d.metadata["end_position"]))
         if document_id in aggregated_docs:
-            aggregated_docs[document_id].append(d.page_content)
+            aggregated_docs[document_id]["content"].append(d.page_content)
+            aggregated_docs[document_id]["segments"].append(str((start_location , end_location)))
         else:
-            aggregated_docs[document_id] = [d.page_content]
+            aggregated_docs[document_id] ={"content" : [d.page_content] , "segments" : [str((start_location , end_location))]}
 
     context_parts = []
-    for i, (document_id, content_parts) in enumerate(aggregated_docs.items()):
+    for i, (document_id, data_parts) in enumerate(aggregated_docs.items()):
         # Calculate the token count of the entire file
+        content_parts = data_parts["content"]
+        context_segments = data_parts["segments"]
         entire_file_token_count = corpus_summary.loc[
             corpus_summary["file_name"] == document_id
         ]["n_tokens"].values[0]
@@ -164,7 +169,8 @@ def format_context(docs, LOCAL_REPO_PATH):
         else:
             # Include only the content_parts
             context_parts.append(
-                f"[{i}] From file {document_id}:\n" + "\n---\n".join(content_parts)
+                f"[{i}] these are the segments (by start and end locations) ".join(context_segments)
+                +"\n From file {document_id}:\n" + "\n---\n".join(content_parts)
             )
 
     context = "\n\n".join(context_parts)

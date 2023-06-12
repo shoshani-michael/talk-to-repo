@@ -6,7 +6,7 @@ For example, here's a correctly generated diff:
 diff --git a/relative/path/file.py b/relative/path/file.py
 --- a/relative/path/file.py
 +++ b/relative/path/file.py
-@@ -start_line,number_of_lines_in_a_in_diff +start_line,number_of_lines_in_b_in_diff @@ def say_hello():
+@@ -segment_start_line,number_of_lines_in_a_in_diff +segment_start_line,number_of_lines_in_b_in_diff @@ def say_hello():
      a = "hello"
      b = " everyone"
 -    print(a, b)
@@ -16,7 +16,7 @@ diff --git a/relative/path/file.py b/relative/path/file.py
      return c
 ```
 
-the value of start_line in the metadata represent the row of the beginning of file a/relative/path/file.py . to calculate the diff start_line take start_line from the metadata and add to it the line number of the start of the diff.
+the value of segment_start_line in the context represent the row of the beginning of file a/relative/path/file.py . to calculate the diff start_line take segment from the context and add to it the line number of the start of the diff.
 
 When writing existing or new code (not diffs), make sure to specify the language of the code. For example, if you were generating Python, you would write the following:
 
