@@ -138,11 +138,11 @@ def format_context(docs, LOCAL_REPO_PATH):
 
     for d in docs:
         document_id = d.metadata["document_id"]
-        start_location = str((d.metadata["start_line"] , d.metadata["start_position"]))
-        end_location = str((d.metadata["end_line"] , d.metadata["end_position"]))
+        start_location = (str(d.metadata["start_line"]) , str(d.metadata["start_position"]))
+        end_location = (str(d.metadata["end_line"]) , str(d.metadata["end_position"]))
         if document_id in aggregated_docs:
             aggregated_docs[document_id]["content"].append(d.page_content)
-            aggregated_docs[document_id]["segments"].append(str((start_location , end_location)))
+            aggregated_docs[document_id]["segments"].append((start_location , end_location)))
         else:
             aggregated_docs[document_id] ={"content" : [d.page_content] , "segments" : [str((start_location , end_location))]}
 
@@ -170,8 +170,9 @@ def format_context(docs, LOCAL_REPO_PATH):
             # Include only the content_parts
             for i in range(len(context_segments)):
                 context_parts.append(
-                    f"[{i}] these is the segment (by start and end locations) {context_segments[i]}"
-                    + f"\n From file {document_id}:\n {content_parts[i]}" + "\n---\n"
+                    f"[{i}] this segment contains from line {context_segments[i][0][0]} in position {context_segments[i][0][1]}" \
+                    f"to line {context_segments[i][1][0]} and position {context_segments[i][1][1]}"
+                    + f"\n of file {document_id}:\n {content_parts[i]}" + "\n---\n"
                 )
 
     context = "\n\n".join(context_parts)
