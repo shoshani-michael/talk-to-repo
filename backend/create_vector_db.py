@@ -132,7 +132,6 @@ def process_file_list(temp_dir):
                     print(f"Processing {file_path}")
                     file_contents = file.read()
                     n_tokens = len(encoder.encode(file_contents))
-                    index_of_first_line_in_original_doc = 0
                     file_path = file_path.replace(temp_dir, "").lstrip("/")
                     corpus_summary.append(
                         {"file_name": file_path, "n_tokens": n_tokens}
