@@ -168,10 +168,11 @@ def format_context(docs, LOCAL_REPO_PATH):
             context_parts.append(f"[{i}] Full file {document_id}:\n" + file_contents)
         else:
             # Include only the content_parts
-            context_parts.append(
-                f"[{i}] these are the segments (by start and end locations) ".join(context_segments)
-                +"\n From file {document_id}:\n" + "\n---\n".join(content_parts)
-            )
+            for i in range(len(context_segments)):
+                context_parts.append(
+                    f"[{i}] these is the segment (by start and end locations) {context_segments[i]}"
+                    + f"\n From file {document_id}:\n {content_parts[i]}" + "\n---\n"
+                )
 
     context = "\n\n".join(context_parts)
 
