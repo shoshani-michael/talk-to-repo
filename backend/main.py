@@ -5,7 +5,7 @@ import subprocess
 import tempfile
 import threading
 from typing import List, Optional
-
+import re
 import openai
 import pandas as pd
 import pinecone
@@ -165,20 +165,28 @@ def format_context(docs, LOCAL_REPO_PATH):
             fname = LOCAL_REPO_PATH + "/" + document_id
             with open(fname, "r") as f:
                 file_contents = f.read()
-            context_parts.append(f"[{i}] Full file {document_id}:\n" + file_contents)
+            context_parts.append(f"[{i}] Full file {document_id}:\n" + add_line_numbers(file_contents))
         else:
             # Include only the content_parts
             for i in range(len(context_segments)):
                 context_parts.append(
                     f"[{i}] this segment contains text from line {context_segments[i][0][0]} in position {context_segments[i][0][1]} " \
                     f"to line {context_segments[i][1][0]} and position {context_segments[i][1][1]}"
-                    + f" of file {document_id}:\n {content_parts[i]}" + "\n---\n"
+                    + f" of file {document_id}:\n {add_line_numbers(content_parts[i] , start=context_segments[i][0][0])}" + "\n---\n"
                 )
 
     context = "\n\n".join(context_parts)
 
     return context
 
+
+def repl(m):
+        repl.cnt+=1
+        return f'{repl.cnt:03d}: '
+
+def add_line_numbers(text , start=0):
+    repl.cnt=int(start) - min(1 , int(start))
+    return re.sub(r'(?m)^', repl, text)
 
 def format_query(query, context):
     return f"""Relevant context: {context}
