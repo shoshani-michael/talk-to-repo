@@ -142,9 +142,9 @@ def format_context(docs, LOCAL_REPO_PATH):
         end_location = (str(d.metadata["end_line"]) , str(d.metadata["end_position"]))
         if document_id in aggregated_docs:
             aggregated_docs[document_id]["content"].append(d.page_content)
-            aggregated_docs[document_id]["segments"].append((start_location , end_location)))
+            aggregated_docs[document_id]["segments"].append((start_location , end_location))
         else:
-            aggregated_docs[document_id] ={"content" : [d.page_content] , "segments" : [str((start_location , end_location))]}
+            aggregated_docs[document_id] ={"content" : [d.page_content] , "segments" : [(start_location , end_location)]}
 
     context_parts = []
     for i, (document_id, data_parts) in enumerate(aggregated_docs.items()):
@@ -170,7 +170,7 @@ def format_context(docs, LOCAL_REPO_PATH):
             # Include only the content_parts
             for i in range(len(context_segments)):
                 context_parts.append(
-                    f"[{i}] this segment contains from line {context_segments[i][0][0]} in position {context_segments[i][0][1]}" \
+                    f"[{i}] this segment contains text from line {context_segments[i][0][0]} in position {context_segments[i][0][1]}" \
                     f"to line {context_segments[i][1][0]} and position {context_segments[i][1][1]}"
                     + f"\n of file {document_id}:\n {content_parts[i]}" + "\n---\n"
                 )
