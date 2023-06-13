@@ -2,8 +2,12 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2a30fcca-2a6c-469c-be98-3f27daec237f" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/components/Header1.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/test1.diff" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/main.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/query-preamble.txt" beforeDir="false" afterPath="$PROJECT_DIR$/backend/query-preamble.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ChatMessages.js" beforeDir="false" afterPath="$PROJECT_DIR$/components/ChatMessages.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -38,6 +42,7 @@
       <recent name="$PROJECT_DIR$/components" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$" />
       <recent name="$PROJECT_DIR$/components" />
     </key>
   </component>
@@ -49,7 +54,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1686061325044</updated>
-      <workItem from="1686061326273" duration="66791000" />
+      <workItem from="1686061326273" duration="75751000" />
     </task>
     <servers />
   </component>

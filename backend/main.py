@@ -170,9 +170,9 @@ def format_context(docs, LOCAL_REPO_PATH):
             # Include only the content_parts
             for i in range(len(context_segments)):
                 context_parts.append(
-                    f"[{i}] this segment contains text from line {context_segments[i][0][0]} in position {context_segments[i][0][1]}" \
+                    f"[{i}] this segment contains text from line {context_segments[i][0][0]} in position {context_segments[i][0][1]} " \
                     f"to line {context_segments[i][1][0]} and position {context_segments[i][1][1]}"
-                    + f"\n of file {document_id}:\n {content_parts[i]}" + "\n---\n"
+                    + f" of file {document_id}:\n {content_parts[i]}" + "\n---\n"
                 )
 
     context = "\n\n".join(context_parts)
@@ -539,6 +539,7 @@ def apply_diff_to_file(diff: str, file_path: str) -> None:
     # debug
     print(f"Applying diff to file: {file_path}, CWD: {LOCAL_REPO_PATH}")
     print(diff)
+    print("-------")
 
     # call git apply with the diff, and check if it was successful
     #"--unidiff-zero",
@@ -549,7 +550,6 @@ def apply_diff_to_file(diff: str, file_path: str) -> None:
             "temp.diff",
             "--unidiff-zero",
             "--inaccurate-eof",
-            "--allow-empty",
             "--ignore-whitespace",
         ],
         cwd=LOCAL_REPO_PATH,
