@@ -1,6 +1,5 @@
 import React from 'react';
 import GitHubInput from './GitHubInput';
-
 const Header = (props) => {
   return (
     <div className="bg-gray-700 text-white text-center py-4">

@@ -14,7 +14,6 @@ For example, if the context contains:
 "
 
 Then a correctly generated diff will look like this (obviously only leave in the code lines and not line numbers when generating the diff - make sure in the final diff that the number of spaces at the start of each line is the same as in the context):
-
 ```diff
 diff --git a/relative/path/file.py b/relative/path/file.py
 --- a/relative/path/file.py
@@ -28,7 +27,7 @@ new:+    print("hello again")
 153:     c = 1 + 2
 new:+    print(c)
 154     return c
-```
+
 
 When writing existing or new code (not diffs), make sure to specify the language of the code. For example, if you were generating Python, you would write the following:
 
