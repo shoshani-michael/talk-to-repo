@@ -176,30 +176,36 @@ export default function Home() {
                 <div className="flex flex-wrap md:flex-nowrap justify-center md:space-x-4">
                     <div className="w-full md:w-3/4 xl:w-3/5 md:max-w-screen-md order-last md:order-none">
                         <div className="flex justify-between h-full">
-                            <div className="w-full lg:w-3/5 overflow-auto">
+                        <div
+                            className={`w-full ${
+                                collectedCodeBlocks.length > 0 ? "lg:w-3/5" : "lg:w-full"
+                            } overflow-auto`}
+                        >
                                 <ChatMessages messages={messages} onCollectCodeBlock={handleCollectCodeBlock} />
                             </div>
-                            <div className="w-full lg:w-2/5 lg:ml-4 overflow-auto">
-                                {collectedCodeBlocks.map((code, index) => (
-                                    <div
-                                        key={index}
-                                        className="whitespace-pre-wrap bg-gray-100 text-gray-800
-                                            max-w-md text-xs p-2 rounded-lg shadow-md cursor-pointer my-2"
-                                        onClick={() => toggleCodeBlock(index)}
-                                    >
-                                        <SyntaxHighlighter
-                                            style={oneDark}
-                                            customStyle={{
-                                                backgroundColor: "#2d2d2d",
-                                                borderRadius: "0.375rem",
-                                                padding: "1rem",
-                                            }}
+                            {collectedCodeBlocks.length > 0 && (
+                                <div className="w-full lg:w-2/5 lg:ml-4 overflow-auto">
+                                    {collectedCodeBlocks.map((code, index) => (
+                                        <div
+                                            key={index}
+                                            className="whitespace-pre-wrap bg-gray-100 text-gray-800
+                                                max-w-md text-xs p-2 rounded-lg shadow-md cursor-pointer my-2"
+                                            onClick={() => toggleCodeBlock(index)}
                                         >
-                                            {code}
-                                        </SyntaxHighlighter>
-                                    </div>
-                                ))}
-                            </div>
+                                            <SyntaxHighlighter
+                                                style={oneDark}
+                                                customStyle={{
+                                                    backgroundColor: "#2d2d2d",
+                                                    borderRadius: "0.375rem",
+                                                    padding: "1rem",
+                                                }}
+                                            >
+                                                {code}
+                                            </SyntaxHighlighter>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
